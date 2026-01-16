@@ -6,6 +6,7 @@ import (
 	"kama_chat_server/internal/https_server"
 	"kama_chat_server/internal/service/chat"
 	"kama_chat_server/internal/service/kafka"
+	"kama_chat_server/internal/service/push"
 	myredis "kama_chat_server/internal/service/redis"
 	"kama_chat_server/pkg/zlog"
 	"os"
@@ -17,16 +18,13 @@ func main() {
 	conf := config.GetConfig()
 	host := conf.MainConfig.Host
 	port := conf.MainConfig.Port
-	kafkaConfig := conf.KafkaConfig
-	if kafkaConfig.MessageMode == "kafka" {
-		kafka.KafkaService.KafkaInit()
-	}
 
-	if kafkaConfig.MessageMode == "channel" {
-		go chat.ChatServer.Start()
-	} else {
-		go chat.KafkaChatServer.Start()
-	}
+	go chat.ConversationServer.Start()
+	go chat.UserServer.Start()
+
+	kafka.KafkaService.KafkaInit()
+
+	go push.Pusher.Start()
 
 	go func() {
 		// Win10本地部署
@@ -48,11 +46,9 @@ func main() {
 	// 等待信号
 	<-quit
 
-	if kafkaConfig.MessageMode == "kafka" {
-		kafka.KafkaService.KafkaClose()
-	}
+	kafka.KafkaService.KafkaClose()
 
-	chat.ChatServer.Close()
+	push.Pusher.Close()
 
 	zlog.Info("关闭服务器...")
 

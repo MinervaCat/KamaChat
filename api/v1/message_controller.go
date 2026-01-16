@@ -18,6 +18,7 @@ func GetMessageList(c *gin.Context) {
 		})
 		return
 	}
+	//todo
 	message, rsp, ret := gorm.MessageService.GetMessageList(req.UserOneId, req.UserTwoId)
 	JsonBack(c, message, ret, rsp)
 }

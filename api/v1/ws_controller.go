@@ -3,10 +3,11 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"kama_chat_server/internal/dto/request"
-	"kama_chat_server/internal/service/chat"
+	"kama_chat_server/internal/service/push"
 	"kama_chat_server/pkg/constants"
 	"kama_chat_server/pkg/zlog"
 	"net/http"
+	"strconv"
 )
 
 // WsLogin wss登录 Get
@@ -20,7 +21,16 @@ func WsLogin(c *gin.Context) {
 		})
 		return
 	}
-	chat.NewClientInit(c, clientId)
+	userId, err := strconv.ParseInt(clientId, 10, 64)
+	if err != nil {
+		zlog.Error("clientId转换失败")
+		c.JSON(http.StatusOK, gin.H{
+			"code":    400,
+			"message": "clientId获取失败",
+		})
+		return
+	}
+	push.NewClientInit(c, userId)
 }
 
 // WsLogout wss登出
@@ -34,6 +44,15 @@ func WsLogout(c *gin.Context) {
 		})
 		return
 	}
-	message, ret := chat.ClientLogout(req.OwnerId)
+	userId, err := strconv.ParseInt(req.OwnerId, 10, 64)
+	if err != nil {
+		zlog.Error("Id转换失败")
+		c.JSON(http.StatusOK, gin.H{
+			"code":    500,
+			"message": constants.SYSTEM_ERROR,
+		})
+		return
+	}
+	message, ret := push.ClientLogout(userId)
 	JsonBack(c, message, ret, nil)
 }
