@@ -21,7 +21,7 @@
 *.xml
 
 *_local.go
-*_local.toml
+
 
 vendor/*
 
