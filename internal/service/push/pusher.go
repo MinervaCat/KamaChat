@@ -32,7 +32,7 @@ type MessagePush struct {
 
 var Pusher *pusher
 
-func Init() {
+func init() {
 	if Pusher != nil {
 		Pusher = &pusher{}
 		listen, err := net.Listen("tcp", ":9090")
