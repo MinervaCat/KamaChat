@@ -33,8 +33,13 @@ type MessagePush struct {
 var Pusher *pusher
 
 func init() {
-	if Pusher != nil {
-		Pusher = &pusher{}
+	if Pusher == nil {
+		Pusher = &pusher{
+			messageChan: make(chan *MessagePush),
+			Clients:     make(map[int64]*Client),
+			Login:       make(chan *Client),
+			Logout:      make(chan *Client),
+		}
 		listen, err := net.Listen("tcp", ":9090")
 		if err != nil {
 		}
