@@ -41,19 +41,20 @@ func init() {
 			Login:       make(chan *Client),
 			Logout:      make(chan *Client),
 		}
-		listen, err := net.Listen("tcp", ":9090")
-		if err != nil {
-		}
-		grpcServer := grpc.NewServer()
-		pb.RegisterPushServer(grpcServer, &pusher{})
-		err = grpcServer.Serve(listen)
-		if err != nil {
-		}
+
 	}
 }
 
 func (p *pusher) Start() {
 	log.Println("Pusher开始启动")
+	listen, err := net.Listen("tcp", ":9090")
+	if err != nil {
+	}
+	grpcServer := grpc.NewServer()
+	pb.RegisterPushServer(grpcServer, &pusher{})
+	err = grpcServer.Serve(listen)
+	if err != nil {
+	}
 	for {
 		select {
 		case message := <-p.messageChan:
