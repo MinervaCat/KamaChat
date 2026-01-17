@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+	zlog.Info("服务开始")
 	conf := config.GetConfig()
 	host := conf.MainConfig.Host
 	port := conf.MainConfig.Port

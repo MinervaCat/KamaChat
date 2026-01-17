@@ -29,7 +29,6 @@ var conversationQuit = make(chan os.Signal, 1)
 func init() {
 	if ConversationServer == nil {
 		ConversationServer = &conversationServer{
-
 			conversationSeq: make(map[string]int64),
 		}
 	}
