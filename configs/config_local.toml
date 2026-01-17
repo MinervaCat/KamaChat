@@ -23,7 +23,7 @@ signName = "阿里云短信测试"
 templateCode = "SMS_154950909"
 
 [logConfig]
-logPath = "./logs"
+logPath = "./logs.log"
 
 [kafkaConfig]
 messageMode = "kafka"# 消息模式 channel or kafka
