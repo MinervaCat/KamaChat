@@ -1,4 +1,4 @@
-package push_server
+package main
 
 import (
 	"fmt"
