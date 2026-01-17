@@ -13,6 +13,7 @@ import (
 	pb "kama_chat_server/pb"
 	"kama_chat_server/pkg/constants"
 	"kama_chat_server/pkg/zlog"
+	"log"
 	"net"
 	"net/http"
 )
@@ -52,7 +53,7 @@ func init() {
 }
 
 func (p *pusher) Start() {
-	zlog.Info("Pusher开始启动")
+	log.Println("Pusher开始启动")
 	for {
 		select {
 		case message := <-p.messageChan:
@@ -63,18 +64,18 @@ func (p *pusher) Start() {
 		case client := <-p.Login:
 			{
 				p.Clients[client.UserId] = client
-				zlog.Debug(fmt.Sprintf("欢迎来到kama聊天服务器，亲爱的用户%s\n", client.UserId))
+				log.Println(fmt.Sprintf("欢迎来到kama聊天服务器，亲爱的用户%s\n", client.UserId))
 				err := client.Conn.WriteMessage(websocket.TextMessage, []byte("欢迎来到kama聊天服务器"))
 				if err != nil {
-					zlog.Error(err.Error())
+					log.Fatal(err.Error())
 				}
 			}
 		case client := <-p.Logout:
 			{
 				delete(p.Clients, client.UserId)
-				zlog.Info(fmt.Sprintf("用户%s退出登录\n", client.UserId))
+				log.Println(fmt.Sprintf("用户%s退出登录\n", client.UserId))
 				if err := client.Conn.WriteMessage(websocket.TextMessage, []byte("已退出登录")); err != nil {
-					zlog.Error(err.Error())
+					log.Fatal(err.Error())
 				}
 			}
 
