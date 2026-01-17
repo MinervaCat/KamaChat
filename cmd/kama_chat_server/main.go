@@ -9,13 +9,14 @@ import (
 	"kama_chat_server/internal/service/push"
 	myredis "kama_chat_server/internal/service/redis"
 	"kama_chat_server/pkg/zlog"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-	zlog.Info("服务开始")
+	log.Println("服务开始")
 	conf := config.GetConfig()
 	host := conf.MainConfig.Host
 	port := conf.MainConfig.Port

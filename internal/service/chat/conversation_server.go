@@ -36,7 +36,7 @@ func init() {
 }
 
 func (c *conversationServer) Start() {
-	zlog.Info("ConversationServer开始启动")
+	log.Println("ConversationServer开始启动")
 	defer func() {
 		if r := recover(); r != nil {
 			zlog.Error(fmt.Sprintf("conversation server panic: %v", r))
