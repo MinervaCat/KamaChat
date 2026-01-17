@@ -47,6 +47,7 @@ func init() {
 
 func (p *pusher) Start() {
 	log.Println("Pusher开始启动")
+	zlog.Info("Pusher开始启动")
 	listen, err := net.Listen("tcp", ":9090")
 	if err != nil {
 	}

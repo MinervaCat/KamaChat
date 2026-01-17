@@ -20,6 +20,19 @@ type kafkaService struct {
 
 var KafkaService = new(kafkaService)
 
+func (k *kafkaService) KafkaInit2() {
+	//k.CreateTopic()
+	kafkaConfig := myconfig.GetConfig().KafkaConfig
+	k.ConversationWriter = &kafka.Writer{
+		Addr:                   kafka.TCP(kafkaConfig.HostPort),
+		Topic:                  kafkaConfig.ConversationImTopic,
+		Balancer:               &kafka.Hash{},
+		WriteTimeout:           kafkaConfig.Timeout * time.Second,
+		RequiredAcks:           kafka.RequireNone,
+		AllowAutoTopicCreation: false,
+	}
+}
+
 // KafkaInit 初始化kafka
 func (k *kafkaService) KafkaInit() {
 	//k.CreateTopic()
