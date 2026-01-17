@@ -12,9 +12,9 @@ import (
 
 // WsLogin wss登录 Get
 func WsLogin(c *gin.Context) {
-	clientId := c.Query("client_id")
+	clientId := c.Query("user_id")
 	if clientId == "" {
-		zlog.Error("clientId获取失败")
+		zlog.Error("userId获取失败")
 		c.JSON(http.StatusOK, gin.H{
 			"code":    400,
 			"message": "clientId获取失败",
@@ -23,7 +23,7 @@ func WsLogin(c *gin.Context) {
 	}
 	userId, err := strconv.ParseInt(clientId, 10, 64)
 	if err != nil {
-		zlog.Error("clientId转换失败")
+		zlog.Error("userId转换失败")
 		c.JSON(http.StatusOK, gin.H{
 			"code":    400,
 			"message": "clientId获取失败",

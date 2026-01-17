@@ -14,7 +14,7 @@ import (
 	"kama_chat_server/internal/service/sms"
 	"kama_chat_server/pkg/constants"
 	"kama_chat_server/pkg/enum/user_info/user_status_enum"
-	"kama_chat_server/pkg/util/random"
+
 	"kama_chat_server/pkg/zlog"
 	"regexp"
 	"time"
@@ -55,7 +55,7 @@ func (u *userInfoService) checkUserIsAdminOrNot(user model.UserInfo) int8 {
 func (u *userInfoService) Login(loginReq request.LoginRequest) (string, *respond.LoginRespond, int) {
 	password := loginReq.Password
 	var user model.UserInfo
-	res := dao.GormDB.First(&user, "telephone = ?", loginReq.Telephone)
+	res := dao.GormDB.First(&user, "user_id = ?", loginReq.Telephone)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			message := "用户不存在，请注册"
@@ -72,8 +72,7 @@ func (u *userInfoService) Login(loginReq request.LoginRequest) (string, *respond
 	}
 
 	loginRsp := &respond.LoginRespond{
-		Uuid:      user.Uuid,
-		Telephone: user.Telephone,
+		UserId:    user.UserId,
 		Nickname:  user.Nickname,
 		Email:     user.Email,
 		Avatar:    user.Avatar,
@@ -121,8 +120,7 @@ func (u *userInfoService) SmsLogin(req request.SmsLoginRequest) (string, *respon
 	}
 
 	loginRsp := &respond.LoginRespond{
-		Uuid:      user.Uuid,
-		Telephone: user.Telephone,
+		UserId:    user.UserId,
 		Nickname:  user.Nickname,
 		Email:     user.Email,
 		Avatar:    user.Avatar,
@@ -144,10 +142,10 @@ func (u *userInfoService) SendSmsCode(telephone string) (string, int) {
 }
 
 // checkTelephoneExist 检查手机号是否存在
-func (u *userInfoService) checkTelephoneExist(telephone string) (string, int) {
+func (u *userInfoService) checkTelephoneExist(telephone int64) (string, int) {
 	var user model.UserInfo
 	// gorm默认排除软删除，所以翻译过来的select语句是SELECT * FROM `user_info` WHERE telephone = '18089596095' AND `user_info`.`deleted_at` IS NULL ORDER BY `user_info`.`id` LIMIT 1
-	if res := dao.GormDB.Where("telephone = ?", telephone).First(&user); res.Error != nil {
+	if res := dao.GormDB.Where("user_id = ?", telephone).First(&user); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			zlog.Info("该电话不存在，可以注册")
 			return "", 0
@@ -160,23 +158,23 @@ func (u *userInfoService) checkTelephoneExist(telephone string) (string, int) {
 }
 
 // Register 注册，返回(message, register_respond_string, error)
-func (u *userInfoService) Register(registerReq request.RegisterRequest) (string, *respond.RegisterRespond, int) {
-	key := "auth_code_" + registerReq.Telephone
-	code, err := myredis.GetKey(key)
-	if err != nil {
-		zlog.Error(err.Error())
-		return constants.SYSTEM_ERROR, nil, -1
-	}
-	if code != registerReq.SmsCode {
-		message := "验证码不正确，请重试"
-		zlog.Info(message)
-		return message, nil, -2
-	} else {
-		if err := myredis.DelKeyIfExists(key); err != nil {
-			zlog.Error(err.Error())
-			return constants.SYSTEM_ERROR, nil, -1
-		}
-	}
+func (u *userInfoService) Register(registerReq request.RegisterRequest2) (string, *respond.RegisterRespond, int) {
+	//key := "auth_code_" + registerReq.Telephone
+	//code, err := myredis.GetKey(key)
+	//if err != nil {
+	//	zlog.Error(err.Error())
+	//	return constants.SYSTEM_ERROR, nil, -1
+	//}
+	//if code != registerReq.SmsCode {
+	//	message := "验证码不正确，请重试"
+	//	zlog.Info(message)
+	//	return message, nil, -2
+	//} else {
+	//	if err := myredis.DelKeyIfExists(key); err != nil {
+	//		zlog.Error(err.Error())
+	//		return constants.SYSTEM_ERROR, nil, -1
+	//	}
+	//}
 	// 不用校验手机号，前端校验
 	// 判断电话是否已经被注册过了
 	message, ret := u.checkTelephoneExist(registerReq.Telephone)
@@ -184,8 +182,7 @@ func (u *userInfoService) Register(registerReq request.RegisterRequest) (string,
 		return message, nil, ret
 	}
 	var newUser model.UserInfo
-	newUser.Uuid = "U" + random.GetNowAndLenRandomString(11)
-	newUser.Telephone = registerReq.Telephone
+	newUser.UserId = registerReq.Telephone
 	newUser.Password = registerReq.Password
 	newUser.Nickname = registerReq.Nickname
 	newUser.Avatar = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
@@ -209,13 +206,10 @@ func (u *userInfoService) Register(registerReq request.RegisterRequest) (string,
 	//	return "", err
 	//}
 	registerRsp := &respond.RegisterRespond{
-		Uuid:      newUser.Uuid,
-		Telephone: newUser.Telephone,
+		UserId:    newUser.UserId,
 		Nickname:  newUser.Nickname,
-		Email:     newUser.Email,
 		Avatar:    newUser.Avatar,
 		Gender:    newUser.Gender,
-		Birthday:  newUser.Birthday,
 		Signature: newUser.Signature,
 		IsAdmin:   newUser.IsAdmin,
 		Status:    newUser.Status,
@@ -273,11 +267,11 @@ func (u *userInfoService) GetUserInfoList(ownerId string) (string, []respond.Get
 	var rsp []respond.GetUserListRespond
 	for _, user := range users {
 		rp := respond.GetUserListRespond{
-			Uuid:      user.Uuid,
-			Telephone: user.Telephone,
-			Nickname:  user.Nickname,
-			Status:    user.Status,
-			IsAdmin:   user.IsAdmin,
+			UserId: user.UserId,
+
+			Nickname: user.Nickname,
+			Status:   user.Status,
+			IsAdmin:  user.IsAdmin,
 		}
 		if user.DeletedAt.Valid {
 			rp.IsDeleted = true
@@ -326,7 +320,7 @@ func (u *userInfoService) DisableUsers(uuidList []string) (string, int) {
 			return constants.SYSTEM_ERROR, -1
 		}
 		var sessionList []model.Session
-		if res := dao.GormDB.Where("send_id = ? or receive_id = ?", user.Uuid, user.Uuid).Find(&sessionList); res.Error != nil {
+		if res := dao.GormDB.Where("send_id = ? or receive_id = ?", user.UserId, user.UserId).Find(&sessionList); res.Error != nil {
 			zlog.Error(res.Error.Error())
 			return constants.SYSTEM_ERROR, -1
 		}
@@ -366,7 +360,7 @@ func (u *userInfoService) DeleteUsers(uuidList []string) (string, int) {
 
 		// 删除会话
 		var sessionList []model.Session
-		if res := dao.GormDB.Where("send_id = ? or receive_id = ?", user.Uuid, user.Uuid).Find(&sessionList); res.Error != nil {
+		if res := dao.GormDB.Where("send_id = ? or receive_id = ?", user.UserId, user.UserId).Find(&sessionList); res.Error != nil {
 			if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 				zlog.Info(res.Error.Error())
 			} else {
@@ -387,7 +381,7 @@ func (u *userInfoService) DeleteUsers(uuidList []string) (string, int) {
 
 		// 删除联系人
 		var contactList []model.UserContact
-		if res := dao.GormDB.Where("user_id = ? or contact_id = ?", user.Uuid, user.Uuid).Find(&contactList); res.Error != nil {
+		if res := dao.GormDB.Where("user_id = ? or contact_id = ?", user.UserId, user.UserId).Find(&contactList); res.Error != nil {
 			if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 				zlog.Info(res.Error.Error())
 			} else {
@@ -408,7 +402,7 @@ func (u *userInfoService) DeleteUsers(uuidList []string) (string, int) {
 
 		// 删除申请记录
 		var applyList []model.ContactApply
-		if res := dao.GormDB.Where("user_id = ? or contact_id = ?", user.Uuid, user.Uuid).Find(&applyList); res.Error != nil {
+		if res := dao.GormDB.Where("user_id = ? or contact_id = ?", user.UserId, user.UserId).Find(&applyList); res.Error != nil {
 			if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 				zlog.Info(res.Error.Error())
 			} else {
@@ -449,8 +443,7 @@ func (u *userInfoService) GetUserInfo(uuid string) (string, *respond.GetUserInfo
 				return constants.SYSTEM_ERROR, nil, -1
 			}
 			rsp := respond.GetUserInfoRespond{
-				Uuid:      user.Uuid,
-				Telephone: user.Telephone,
+				UserId:    user.UserId,
 				Nickname:  user.Nickname,
 				Avatar:    user.Avatar,
 				Birthday:  user.Birthday,

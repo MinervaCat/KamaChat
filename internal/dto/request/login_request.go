@@ -1,6 +1,6 @@
 package request
 
 type LoginRequest struct {
-	Telephone string `json:"telephone"`
+	Telephone int64  `json:"telephone"`
 	Password  string `json:"password"`
 }

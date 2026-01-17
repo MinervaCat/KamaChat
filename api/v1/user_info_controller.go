@@ -12,7 +12,7 @@ import (
 
 // Register 注册
 func Register(c *gin.Context) {
-	var registerReq request.RegisterRequest
+	var registerReq request.RegisterRequest2
 	if err := c.BindJSON(&registerReq); err != nil {
 		zlog.Error(err.Error())
 		c.JSON(http.StatusOK, gin.H{

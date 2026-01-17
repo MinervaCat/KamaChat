@@ -6,3 +6,9 @@ type RegisterRequest struct {
 	Nickname  string `json:"nickname"`
 	SmsCode   string `json:"sms_code"`
 }
+
+type RegisterRequest2 struct {
+	Telephone int64  `json:"telephone"`
+	Password  string `json:"password"`
+	Nickname  string `json:"nickname"`
+}
