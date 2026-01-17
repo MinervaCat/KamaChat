@@ -20,11 +20,6 @@ func main() {
 	host := conf.MainConfig.Host
 	port := conf.MainConfig.Port
 
-	go chat.ConversationServer.Start()
-	go chat.UserServer.Start()
-
-	kafka.KafkaService.KafkaInit()
-
 	go func() {
 		// Ubuntu22.04云服务器部署
 		if err := https_server.GE.RunTLS(fmt.Sprintf("%s:%d", host, port), "/etc/ssl/certs/server.crt", "/etc/ssl/private/server.key"); err != nil {
@@ -32,6 +27,10 @@ func main() {
 			return
 		}
 	}()
+	go chat.ConversationServer.Start()
+	go chat.UserServer.Start()
+
+	kafka.KafkaService.KafkaInit()
 
 	// 设置信号监听
 	quit := make(chan os.Signal, 1)
