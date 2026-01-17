@@ -45,7 +45,7 @@ type UserMsg struct {
 }
 
 func (u *userServer) Start() {
-	log.Println("UserServer开始启动")
+	zlog.Info("UserServer开始启动")
 	for {
 		kafkaMessage, err := myKafka.KafkaService.ConversationReader.ReadMessage(context.Background())
 		if err != nil {
