@@ -102,7 +102,7 @@ export default {
             }
             store.commit("setUserInfo", response.data.data);
             messageStore.setCurrentUserId(store.state.userInfo.user_id)
-            messageStore.fetchAllMessage()
+            await messageStore.fetchAllMessage()
             // 准备创建websocket连接
             const wsUrl =
               store.state.wsUrl + "/wss?client_id=" + response.data.data.user_id;

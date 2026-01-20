@@ -12,7 +12,8 @@ import (
 
 // WsLogin wss登录 Get
 func WsLogin(c *gin.Context) {
-	clientId := c.Query("user_id")
+	//todo
+	clientId := c.Query("client_id")
 	if clientId == "" {
 		zlog.Error("userId获取失败")
 		c.JSON(http.StatusOK, gin.H{

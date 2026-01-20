@@ -42,7 +42,7 @@ class MessageStore {
     init() {
         // 可以添加一些初始化逻辑
     }
-    fetchAllMessage() {
+    async fetchAllMessage() {
         console.log("开始获取所有聊天")
         try {
             const req = {
@@ -54,6 +54,7 @@ class MessageStore {
                 store.state.backendUrl + "/message/getMessageAfterSeq",
                 req
             );
+            console.log(rsp);
             if (rsp.data.data) {
                 for (let i = 0; i < rsp.data.data.length; i++) {
                     if (!this.state.sessionMessages.has(rsp.data.data[i].conversation_id)) {
@@ -62,7 +63,6 @@ class MessageStore {
                     this.state.sessionMessages.get(rsp.data.data[i].conversation_id).add(rsp.data.data[i])
                 }
             }
-            console.log(rsp);
         } catch (error) {
             console.error(error);
         }
