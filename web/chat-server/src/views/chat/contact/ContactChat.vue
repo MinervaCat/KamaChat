@@ -37,8 +37,8 @@
                     :key="conversation.conversation_id"
                     @click="handleToChat(conversation)"
                   >
-                    <img :src="user.avatar" class="sessionlist-avatar" />
-                    {{ user.user_name }}
+                    <img :src="conversation.avatar" class="sessionlist-avatar" />
+                    {{ conversation.conversation_id }}
                   </el-menu-item>
                 </el-menu>
                 <el-menu
@@ -519,7 +519,7 @@
                 >
                   <div
                     v-if="
-                      messageItem.send_id != userInfo.uuid &&
+                      messageItem.send_id != userInfo.user_id &&
                       messageItem.type == 0
                     "
                     class="left-message"
@@ -541,10 +541,10 @@
                     <div class="left-message-right">
                       <div class="left-message-right-top">
                         <div class="left-message-contactname">
-                          {{ messageItem.send_name }}
+                          {{ messageItem.send_id }}
                         </div>
                         <div class="left-message-time">
-                          {{ messageItem.created_at }}
+                          {{ messageItem.send_time }}
                         </div>
                       </div>
 
@@ -555,7 +555,7 @@
                   </div>
                   <div
                     v-if="
-                      messageItem.send_id != userInfo.uuid &&
+                      messageItem.send_id != userInfo.user_id &&
                       messageItem.type == 2
                     "
                     class="left-message"
@@ -577,10 +577,10 @@
                     <div class="left-message-right">
                       <div class="left-message-right-top">
                         <div class="left-message-contactname">
-                          {{ messageItem.send_name }}
+                          {{ messageItem.send_id }}
                         </div>
                         <div class="left-message-time">
-                          {{ messageItem.created_at }}
+                          {{ messageItem.send_time }}
                         </div>
                       </div>
 
@@ -620,7 +620,7 @@
                   >
                     <div
                       v-if="
-                        messageItem.send_id == userInfo.uuid &&
+                        messageItem.send_id == userInfo.user_id &&
                         messageItem.type == 0
                       "
                       class="right-message"
@@ -645,7 +645,7 @@
                             {{ userInfo.nickname }}
                           </div>
                           <div class="right-message-time">
-                            {{ messageItem.created_at }}
+                            {{ messageItem.send_time }}
                           </div>
                         </div>
                         <div style="display: flex; flex-direction: row-reverse">
@@ -657,7 +657,7 @@
                     </div>
                     <div
                       v-if="
-                        messageItem.send_id == userInfo.uuid &&
+                        messageItem.send_id == userInfo.user_id &&
                         messageItem.type == 2
                       "
                       class="right-message"
@@ -682,7 +682,7 @@
                             {{ userInfo.nickname }}
                           </div>
                           <div class="right-message-time">
-                            {{ messageItem.created_at }}
+                            {{ messageItem.send_time }}
                           </div>
                         </div>
                         <div style="display: flex; flex-direction: row-reverse">

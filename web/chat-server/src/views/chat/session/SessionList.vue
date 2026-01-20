@@ -37,8 +37,8 @@
                     :key="conversation.conversation_id"
                     @click="handleToChat(conversation)"
                   >
-                    <img :src="user.avatar" class="sessionlist-avatar" />
-                    {{ user.user_name }}
+                    <img :src="conversation.avatar" class="sessionlist-avatar" />
+                    {{ conversation.conversation_id }}
                   </el-menu-item>
                 </el-menu>
                 <el-menu

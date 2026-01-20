@@ -9,6 +9,7 @@ type UserConversationList struct {
 	IsTop          int8   `gorm:"column:is_top"`
 }
 
+// todo user_conversation_idx
 func (UserConversationList) TableName() string {
 	return "user_conversation_list"
 }

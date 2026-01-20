@@ -21,6 +21,14 @@ type conversationService struct{}
 
 var ConversationService = conversationService{}
 
+func getConversation(conversationId string) (*model.Conversation, error) {
+	var conversation model.Conversation
+	if res := dao.GormDB.Where("conversation_id=?", conversationId).First(&conversation); res.Error != nil {
+		return nil, res.Error
+	}
+	return &conversation, nil
+}
+
 // GetUserSessionList 获取用户会话列表
 func (s *conversationService) GetConversationList(ownerId int64) (string, []respond.ConversationListRespond, int) {
 	rspString, err := myredis.GetKeyNilIsErr(fmt.Sprintf("conversation_list_%d", ownerId))
@@ -38,12 +46,20 @@ func (s *conversationService) GetConversationList(ownerId int64) (string, []resp
 			}
 			var conversationListRsp []respond.ConversationListRespond
 			for _, conversation := range conversationList {
-				conversationListRsp = append(conversationListRsp, respond.ConversationListRespond{
-					ConversationId: conversation.ConversationId,
-					LastReadSeq:    conversation.LastReadSeq,
-					NotifyType:     conversation.NotifyType,
-					IsTop:          conversation.IsTop,
-				})
+				if con, err := getConversation(conversation.ConversationId); err != nil {
+					zlog.Error(err.Error())
+				} else {
+					conversationListRsp = append(conversationListRsp, respond.ConversationListRespond{
+						ConversationId: conversation.ConversationId,
+						Avatar:         con.Avatar,
+						Type:           con.Type,
+						Member:         con.Member,
+						RecentMsgTime:  con.RecentMsgTime,
+						LastReadSeq:    conversation.LastReadSeq,
+						NotifyType:     conversation.NotifyType,
+						IsTop:          conversation.IsTop,
+					})
+				}
 			}
 
 			rspString, err := json.Marshal(conversationListRsp)
