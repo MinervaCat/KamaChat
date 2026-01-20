@@ -50,7 +50,7 @@ class MessageStore {
                 seq: this.state.msgSeq,
             };
             console.log(req);
-            const rsp = axios.post(
+            const rsp = await axios.post(
                 store.state.backendUrl + "/message/getMessageAfterSeq",
                 req
             );
