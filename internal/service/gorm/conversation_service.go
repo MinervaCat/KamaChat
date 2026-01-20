@@ -27,7 +27,7 @@ func (s *conversationService) GetConversationList(ownerId int64) (string, []resp
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			var conversationList []model.UserConversationList
-			if res := dao.GormDB.Order("created_at DESC").Where("user_id = ?", ownerId).Find(&conversationList); res.Error != nil {
+			if res := dao.GormDB.Order("last_read_seq DESC").Where("user_id = ?", ownerId).Find(&conversationList); res.Error != nil {
 				if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 					zlog.Info("未创建用户会话")
 					return "未创建用户会话", nil, 0
