@@ -120,7 +120,9 @@ export default {
             store.state.socket.onerror = () => {
               console.log("WebSocket连接发生错误");
             };
-            router.push("/chat/sessionList");
+            console.log("准备跳转");
+            router.push({ name: 'SessionList' });
+            console.log("跳转结束")
           } catch (error) {
             console.log(error);
           }
