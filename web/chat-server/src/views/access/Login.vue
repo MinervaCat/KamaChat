@@ -105,7 +105,7 @@ export default {
             messageStore.fetchAllMessage()
             // 准备创建websocket连接
             const wsUrl =
-              store.state.wsUrl + "/wss?client_id=" + response.data.data.uuid;
+              store.state.wsUrl + "/wss?client_id=" + response.data.data.user_id;
             console.log(wsUrl);
             store.state.socket = new WebSocket(wsUrl);
             store.state.socket.onopen = () => {
