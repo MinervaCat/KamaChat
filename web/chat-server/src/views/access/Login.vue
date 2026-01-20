@@ -121,8 +121,8 @@ export default {
               console.log("WebSocket连接发生错误");
             };
             console.log("准备跳转");
-            router.push({ name: 'SessionList' });
-            console.log("跳转结束")
+            router.push("/chat/sessionList");
+            console.log("跳转结束");
           } catch (error) {
             console.log(error);
           }

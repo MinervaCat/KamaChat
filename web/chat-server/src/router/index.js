@@ -54,7 +54,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (!store.state.userInfo.uuid) {
+  if (!store.state.userInfo.user_id) {
     if (to.path === '/login' || to.path === '/register' || to.path === '/smsLogin') {
       next()
       return
