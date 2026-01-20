@@ -1070,9 +1070,9 @@ export default {
               message.receive_id == data.contactInfo.contact_id) ||
             // 其他用户过来的消息，且当前会话是该用户
             (message.receive_id[0] == "U" &&
-              message.receive_id == data.userInfo.uuid) ||
+              message.receive_id == data.userInfo.user_id) ||
             // 自己发送的消息
-            message.send_id == data.userInfo.uuid
+            message.send_id == data.userInfo.user_id
           ) {
             console.log("收到消息：", message);
             if (data.messageList == null) {
@@ -1098,7 +1098,7 @@ export default {
             );
             data.curContactList.push(messageAVdata.messagecontactId);
           } else if (messageAVdata.messageId === "PEER_LEAVE") {
-            console.log("接收到PEER_LEAVE消息：", data.userInfo.uuid);
+            console.log("接收到PEER_LEAVE消息：", data.userInfo.user_id);
             receiveEndCall();
           } else if (messageAVdata.messageId === "PROXY") {
             console.log("接收到PROXY消息：", message);
@@ -1163,9 +1163,9 @@ export default {
                 message.receive_id == data.contactInfo.contact_id) ||
               // 其他用户过来的消息，且当前会话是该用户
               (message.receive_id[0] == "U" &&
-                message.receive_id == data.userInfo.uuid) ||
+                message.receive_id == data.userInfo.user_id) ||
               // 自己发送的消息
-              message.send_id == data.userInfo.uuid
+              message.send_id == data.userInfo.user_id
             ) {
               console.log("收到消息：", message);
               if (data.messageList == null) {
@@ -1190,7 +1190,7 @@ export default {
               );
               data.curContactList.push(messageAVdata.messagecontactId);
             } else if (messageAVdata.messageId === "PEER_LEAVE") {
-              console.log("接收到PEER_LEAVE消息：", data.userInfo.uuid);
+              console.log("接收到PEER_LEAVE消息：", data.userInfo.user_id);
               receiveEndCall();
             } else if (messageAVdata.messageId === "PROXY") {
               console.log("接收到PROXY消息：", message);
@@ -1254,7 +1254,7 @@ export default {
     const getSessionId = async (contactId) => {
       try {
         const req = {
-          send_id: data.userInfo.uuid,
+          send_id: data.userInfo.user_id,
           receive_id: contactId,
         };
         const rsp = await axios.post(
@@ -1270,7 +1270,7 @@ export default {
 
     const handleCreateGroup = async () => {
       try {
-        data.createGroupReq.owner_id = data.userInfo.uuid;
+        data.createGroupReq.owner_id = data.userInfo.user_id;
         const response = await axios.post(
           store.state.backendUrl + "/group/createGroup",
           data.createGroupReq
@@ -1347,7 +1347,7 @@ export default {
 
     const handleShowUserSessionList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.ownListReq.owner_id = data.userInfo.user_id;
         const userSessionListRsp = await axios.post(
           store.state.backendUrl + "/conversation/getConversationList",
           data.ownListReq
@@ -1370,7 +1370,7 @@ export default {
     };
     const handleShowGroupSessionList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.ownListReq.owner_id = data.userInfo.user_id;
         const groupSessionListRsp = await axios.post(
           store.state.backendUrl + "/session/getGroupSessionList",
           data.ownListReq
@@ -1419,7 +1419,7 @@ export default {
     const deleteSession = async () => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           session_id: data.sessionId,
         };
         const rsp = await axios.post(
@@ -1459,7 +1459,7 @@ export default {
     const deleteContact = async () => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           contact_id: data.contactInfo.contact_id,
         };
         const rsp = await axios.post(
@@ -1499,7 +1499,7 @@ export default {
     const blackContact = async () => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           contact_id: data.contactInfo.contact_id,
         };
         const rsp = await axios.post(
@@ -1518,7 +1518,7 @@ export default {
         type: 0,
         content: data.chatMessage,
         url: "",
-        send_id: data.userInfo.uuid,
+        send_id: data.userInfo.user_id,
         send_name: data.userInfo.nickname,
         send_avatar: data.userInfo.avatar,
         receive_id: data.contactInfo.contact_id,
@@ -1537,7 +1537,7 @@ export default {
         type: 2,
         content: "",
         url: fileUrl,
-        send_id: data.userInfo.uuid,
+        send_id: data.userInfo.user_id,
         send_name: data.userInfo.nickname,
         send_avatar: data.userInfo.avatar,
         receive_id: data.contactInfo.contact_id,
@@ -1556,7 +1556,7 @@ export default {
         type: 2,
         content: "",
         url: avatarUrl,
-        send_id: data.userInfo.uuid,
+        send_id: data.userInfo.user_id,
         send_name: data.userInfo.nickname,
         send_avatar: data.userInfo.avatar,
         receive_id: data.contactInfo.contact_id,
@@ -1573,7 +1573,7 @@ export default {
       try {
         console.log(data.contactInfo);
         const req = {
-          user_one_id: data.userInfo.uuid,
+          user_one_id: data.userInfo.user_id,
           user_two_id: data.contactInfo.contact_id,
         };
         console.log(req);
@@ -1682,7 +1682,7 @@ export default {
     const handleLeaveGroup = async () => {
       try {
         const req = {
-          user_id: data.userInfo.uuid,
+          user_id: data.userInfo.user_id,
           group_id: data.contactInfo.contact_id,
         };
         const rsp = await axios.post(
@@ -1708,7 +1708,7 @@ export default {
     const handleDismissGroup = async () => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           group_id: data.contactInfo.contact_id,
         };
         const rsp = await axios.post(
@@ -1944,7 +1944,7 @@ export default {
             type: 3,
             content: "",
             url: "",
-            send_id: data.userInfo.uuid,
+            send_id: data.userInfo.user_id,
             send_name: data.userInfo.nickname,
             send_avatar: data.userInfo.avatar,
             receive_id: data.contactInfo.contact_id,
@@ -2042,7 +2042,7 @@ export default {
             type: 3,
             content: "",
             url: "",
-            send_id: data.userInfo.uuid,
+            send_id: data.userInfo.user_id,
             send_name: data.userInfo.nickname,
             send_avatar: data.userInfo.avatar,
             receive_id: data.contactInfo.contact_id,
@@ -2078,7 +2078,7 @@ export default {
             type: 3,
             content: "",
             url: "",
-            send_id: data.userInfo.uuid,
+            send_id: data.userInfo.user_id,
             send_name: data.userInfo.nickname,
             send_avatar: data.userInfo.avatar,
             receive_id: data.contactInfo.contact_id,
@@ -2127,7 +2127,7 @@ export default {
           type: 3,
           content: "",
           url: "",
-          send_id: data.userInfo.uuid,
+          send_id: data.userInfo.user_id,
           send_name: data.userInfo.nickname,
           send_avatar: data.userInfo.avatar,
           receive_id: data.contactInfo.contact_id,
@@ -2147,7 +2147,7 @@ export default {
           type: 3,
           content: "",
           url: "",
-          send_id: data.userInfo.uuid,
+          send_id: data.userInfo.user_id,
           send_name: data.userInfo.nickname,
           send_avatar: data.userInfo.avatar,
           receive_id: data.contactInfo.contact_id,
@@ -2184,7 +2184,7 @@ export default {
         type: 3,
         content: "",
         url: "",
-        send_id: data.userInfo.uuid,
+        send_id: data.userInfo.user_id,
         send_name: data.userInfo.nickname,
         send_avatar: data.userInfo.avatar,
         receive_id: data.contactInfo.contact_id,
@@ -2261,7 +2261,7 @@ export default {
         type: 3,
         content: "",
         url: "",
-        send_id: data.userInfo.uuid,
+        send_id: data.userInfo.user_id,
         send_name: data.userInfo.nickname,
         send_avatar: data.userInfo.avatar,
         receive_id: data.contactInfo.contact_id,

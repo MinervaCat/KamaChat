@@ -224,7 +224,7 @@ export default {
       data.isMyInfoModalVisible = false;
       data.fileList = [];
       data.cnt = 0;
-      data.updateInfo.uuid = data.userInfo.uuid;
+      data.updateInfo.uuid = data.userInfo.user_id;
       store.commit("setUserInfo", data.userInfo);
       try {
         const rsp = await axios.post(

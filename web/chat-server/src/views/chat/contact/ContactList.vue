@@ -240,7 +240,7 @@ export default {
 
     const handleCreateGroup = async () => {
       try {
-        data.createGroupReq.owner_id = data.userInfo.uuid;
+        data.createGroupReq.owner_id = data.userInfo.user_id;
         const response = await axios.post(
           store.state.backendUrl + "/group/createGroup",
           data.createGroupReq
@@ -308,7 +308,7 @@ export default {
           ElMessage.error("申请失败");
           return;
         }
-        data.applyContactReq.owner_id = data.userInfo.uuid;
+        data.applyContactReq.owner_id = data.userInfo.user_id;
         rsp = await axios.post(
           store.state.backendUrl + "/contact/applyContact",
           data.applyContactReq
@@ -331,7 +331,7 @@ export default {
     };
     const handleApplyContact = async () => {
       try {
-        data.applyContactReq.owner_id = data.userInfo.uuid;
+        data.applyContactReq.owner_id = data.userInfo.user_id;
         const rsp = await axios.post(
           store.state.backendUrl + "/contact/applyContact",
           data.applyContactReq
@@ -351,7 +351,7 @@ export default {
     };
     const handleShowUserList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.ownListReq.owner_id = data.userInfo.user_id;
         const getUserListRsp = await axios.post(
           store.state.backendUrl + "/contact/getUserList",
           data.ownListReq
@@ -367,7 +367,7 @@ export default {
 
     const handleShowMyGroupList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.ownListReq.owner_id = data.userInfo.user_id;
         const loadMyGroupRsp = await axios.post(
           store.state.backendUrl + "/group/loadMyGroup",
           data.ownListReq
@@ -382,7 +382,7 @@ export default {
     };
     const handleShowMyJoinedGroupList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.ownListReq.owner_id = data.userInfo.user_id;
         const loadMyJoinedGroupRsp = await axios.post(
           store.state.backendUrl + "/contact/loadMyJoinedGroup",
           data.ownListReq
@@ -400,7 +400,7 @@ export default {
     const handleToChatUser = async (user) => {
       try {
         const req = {
-          send_id: data.userInfo.uuid,
+          send_id: data.userInfo.user_id,
           receive_id: user.user_id,
         };
         const rsp = await axios.post(
@@ -427,7 +427,7 @@ export default {
     const handleToChatGroup = async (group) => {
       try {
         const req = {
-          send_id: data.userInfo.uuid,
+          send_id: data.userInfo.user_id,
           receive_id: group.group_id,
         };
         const rsp = await axios.post(
@@ -457,7 +457,7 @@ export default {
 
     const handleNewContactList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.ownListReq.owner_id = data.userInfo.user_id;
         const rsp = await axios.post(
           store.state.backendUrl + "/contact/getNewContactList",
           data.ownListReq
@@ -478,7 +478,7 @@ export default {
     const handleAgree = async (contactId) => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           contact_id: contactId,
         };
         const rsp = await axios.post(
@@ -502,7 +502,7 @@ export default {
       try {
         const req = {
           owner_id:  groupId,
-          contact_id: data.userInfo.uuid,
+          contact_id: data.userInfo.user_id,
         };
         const rsp = await axios.post(
           store.state.backendUrl + "/group/enterGroupDirectly",
@@ -522,7 +522,7 @@ export default {
     const handleReject = async (contactId) => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           contact_id: contactId,
         };
         const rsp = await axios.post(
@@ -550,7 +550,7 @@ export default {
     const handleBlack = async (contactId) => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           contact_id: contactId,
         };
         const rsp = await axios.post(
@@ -578,7 +578,7 @@ export default {
     const handleCancelBlack = async (user) => {
       try {
         const req = {
-          owner_id: data.userInfo.uuid,
+          owner_id: data.userInfo.user_id,
           contact_id: user.user_id,
         };
         const rsp = await axios.post(

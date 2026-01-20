@@ -144,7 +144,7 @@ export default {
     const logout = async () => {
       store.commit("cleanUserInfo");
       const req = {
-        owner_id: data.userInfo.uuid,
+        owner_id: data.userInfo.user_id,
       };
       const rsp = await axios.post(
         store.state.backendUrl + "/user/wsLogout",

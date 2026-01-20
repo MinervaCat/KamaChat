@@ -13,7 +13,7 @@ export default {
     const getUserInfo = async () => {
       try {
         const req = {
-          uuid: store.state.userInfo.uuid,
+          uuid: store.state.userInfo.user_id,
         };
         const rsp = await axios.post(
           store.state.backendUrl + "/user/getUserInfo",
@@ -35,7 +35,7 @@ export default {
     const logout = async () => {
       store.commit("cleanUserInfo");
       const req = {
-        owner_id: store.state.userInfo.uuid,
+        owner_id: store.state.userInfo.user_id,
       };
       const rsp = await axios.post(
         store.state.backendUrl + "/user/wsLogout",
@@ -49,13 +49,13 @@ export default {
       }
     };
     onMounted(() => {
-      if (store.state.userInfo.uuid) {
+      if (store.state.userInfo.user_id) {
         getUserInfo();
         if (store.state.userInfo.status == 1) {
           logout();
         }
         const wsUrl =
-          store.state.wsUrl + "/wss?client_id=" + store.state.userInfo.uuid;
+          store.state.wsUrl + "/wss?client_id=" + store.state.userInfo.user_id;
           console.log(wsUrl);
         store.state.socket = new WebSocket(wsUrl);
         store.state.socket.onopen = () => {

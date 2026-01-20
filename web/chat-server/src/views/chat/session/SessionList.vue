@@ -271,8 +271,8 @@ export default {
         add_mode: null,
         avatar: "",
       },
-      ownListReq: {
-        owner_id: 0,
+      conversationListReq: {
+        user_id: 0,
       },
       userSessionList: [],
       groupSessionList: [],
@@ -294,10 +294,10 @@ export default {
 
     const handleShowUserSessionList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.conversationListReq.user_id = data.userInfo.user_id;
         const userSessionListRsp = await axios.post(
           store.state.backendUrl + "/conversation/getConversationList",
-          data.ownListReq
+          data.conversationListReq
         );
         if (userSessionListRsp.data.data) {
           for (let i = 0; i < userSessionListRsp.data.data.length; i++) {
@@ -317,7 +317,7 @@ export default {
     };
     const handleShowGroupSessionList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.ownListReq.owner_id = data.userInfo.user_id;
         const groupSessionListRsp = await axios.post(
           store.state.backendUrl + "/session/getGroupSessionList",
           data.ownListReq
