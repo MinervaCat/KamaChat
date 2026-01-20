@@ -1010,8 +1010,8 @@ export default {
         contact_owner_id: "",
         contact_add_mode: null,
       },
-      ownListReq: {
-        owner_id: "",
+      conversationListReq: {
+        user_id: 0,
       },
       userSessionList: [],
       groupSessionList: [],
@@ -1058,9 +1058,9 @@ export default {
       // } else {
       //   await getGroupMessageList();
       // }
-      data.messageList = messageStore.getSessionMsg(to.params.id)
-      // await getMessageList(to.params.id);
-      console.log(data.sessionId);
+      data.messageList = messageStore.getSessionMsg(router.currentRoute.value.params.id);
+      console.log(".value.params.id为", router.currentRoute.value.params.id);
+      console.log(data.messageList)
       store.state.socket.onmessage = (jsonMessage) => {
         const message = JSON.parse(jsonMessage.data);
         if (message.type != 3) {
@@ -1153,7 +1153,8 @@ export default {
         //   await getGroupMessageList();
         // }
         data.messageList = messageStore.getSessionMsg(router.currentRoute.value.params.id);
-        console.log(data.sessionId);
+        console.log(".value.params.id为", router.currentRoute.value.params.id);
+        console.log(data.messageList)
         store.state.socket.onmessage = (jsonMessage) => {
           const message = JSON.parse(jsonMessage.data);
           if (message.type != 3) {
@@ -1347,10 +1348,10 @@ export default {
 
     const handleShowUserSessionList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.user_id;
+        data.conversationListReq.user_id = data.userInfo.user_id;
         const userSessionListRsp = await axios.post(
           store.state.backendUrl + "/conversation/getConversationList",
-          data.ownListReq
+            data.conversationListReq
         );
         if (userSessionListRsp.data.data) {
           for (let i = 0; i < userSessionListRsp.data.data.length; i++) {
