@@ -1,7 +1,7 @@
 package model
 
 type UserMsgList struct {
-	Id             int64  `gorm:"column:id;primaryKey;comment:自增id" json:"user_id"`
+	Id             int64  `gorm:"column:id;primaryKey;comment:自增id"`
 	UserId         int64  `gorm:"column:user_id;not null;index:sort_msg_idx,priority:1"`
 	MsgId          int64  `gorm:"column:msg_id;not null"`
 	ConversationId string `gorm:"column:conversation_id;type:varchar(64);comment:会话ID"`
