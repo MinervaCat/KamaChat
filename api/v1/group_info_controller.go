@@ -1,14 +1,6 @@
 package v1
 
-import (
-	"github.com/gin-gonic/gin"
-	"kama_chat_server/internal/dto/request"
-	"kama_chat_server/internal/service/gorm"
-	"kama_chat_server/pkg/constants"
-	"kama_chat_server/pkg/zlog"
-	"net/http"
-)
-
+/*
 // CreateGroup 创建群聊
 func CreateGroup(c *gin.Context) {
 	var createGroupReq request.CreateGroupRequest
@@ -194,3 +186,4 @@ func RemoveGroupMembers(c *gin.Context) {
 	message, ret := gorm.GroupInfoService.RemoveGroupMembers(req)
 	JsonBack(c, message, ret, nil)
 }
+*/

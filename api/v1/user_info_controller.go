@@ -73,7 +73,7 @@ func UpdateUserInfo(c *gin.Context) {
 
 // GetUserInfoList 获取用户列表
 func GetUserInfoList(c *gin.Context) {
-	var req request.GetUserInfoListRequest
+	var req request.UserRequest
 	if err := c.BindJSON(&req); err != nil {
 		zlog.Error(err.Error())
 		c.JSON(http.StatusOK, gin.H{
@@ -82,7 +82,7 @@ func GetUserInfoList(c *gin.Context) {
 		})
 		return
 	}
-	message, userList, ret := gorm.UserInfoService.GetUserInfoList(req.OwnerId)
+	message, userList, ret := gorm.UserInfoService.GetUserInfoList(req.UserId)
 	JsonBack(c, message, ret, userList)
 }
 
@@ -118,7 +118,7 @@ func DisableUsers(c *gin.Context) {
 
 // GetUserInfo 获取用户信息
 func GetUserInfo(c *gin.Context) {
-	var req request.GetUserInfoRequest
+	var req request.UserRequest
 	if err := c.BindJSON(&req); err != nil {
 		zlog.Error(err.Error())
 		c.JSON(http.StatusOK, gin.H{
@@ -127,7 +127,7 @@ func GetUserInfo(c *gin.Context) {
 		})
 		return
 	}
-	message, userInfo, ret := gorm.UserInfoService.GetUserInfo(req.Uuid)
+	message, userInfo, ret := gorm.UserInfoService.GetUserInfo(req.UserId)
 	JsonBack(c, message, ret, userInfo)
 }
 

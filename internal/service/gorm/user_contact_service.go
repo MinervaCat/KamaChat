@@ -13,9 +13,7 @@ import (
 	myredis "kama_chat_server/internal/service/redis"
 	"kama_chat_server/pkg/constants"
 	"kama_chat_server/pkg/enum/contact/contact_status_enum"
-	"kama_chat_server/pkg/enum/contact/contact_type_enum"
 	"kama_chat_server/pkg/enum/contact_apply/contact_apply_status_enum"
-	"kama_chat_server/pkg/enum/group_info/group_status_enum"
 	"kama_chat_server/pkg/enum/user_info/user_status_enum"
 	"kama_chat_server/pkg/util/random"
 	"kama_chat_server/pkg/zlog"
@@ -30,13 +28,12 @@ var UserContactService = new(userContactService)
 
 // GetUserList 获取用户列表
 // 关于用户被禁用的问题，这里查到的是所有联系人，如果被禁用或被拉黑会以弹窗的形式提醒，无法打开会话框；如果被删除，是搜索不到该联系人的。
-func (u *userContactService) GetUserList(ownerId string) (string, []respond.MyUserListRespond, int) {
-	rspString, err := myredis.GetKeyNilIsErr("contact_user_list_" + ownerId)
+func (u *userContactService) GetFriendList(ownerId int64) (string, []respond.MyUserListRespond, int) {
+	rspString, err := myredis.GetKeyNilIsErr(fmt.Sprintf("friend_list_%d", ownerId))
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-
 			// dao
-			var contactList []model.UserContact
+			var contactList []model.Relation
 			// 没有被删除
 			if res := dao.GormDB.Order("created_at DESC").Where("user_id = ? AND status != 4", ownerId).Find(&contactList); res.Error != nil {
 				// 不存在不是业务问题，用Info，return 0
@@ -52,27 +49,26 @@ func (u *userContactService) GetUserList(ownerId string) (string, []respond.MyUs
 			// dto
 			var userListRsp []respond.MyUserListRespond
 			for _, contact := range contactList {
-				// 联系人中是用户的
-				if contact.ContactType == contact_type_enum.USER {
-					// 获取用户信息
-					var user model.UserInfo
-					if res := dao.GormDB.First(&user, "uuid = ?", contact.ContactId); res.Error != nil {
-						// 肯定是存在的，不可能无缘无故删掉，目前不用加notfound的判断
-						zlog.Error(res.Error.Error())
-						return constants.SYSTEM_ERROR, nil, -1
-					}
-					userListRsp = append(userListRsp, respond.MyUserListRespond{
-						UserId:   user.Uuid,
-						UserName: user.Nickname,
-						Avatar:   user.Avatar,
-					})
+
+				// 获取用户信息
+				var user model.User
+				if res := dao.GormDB.First(&user, "user_id = ?", contact.FriendId); res.Error != nil {
+					// 肯定是存在的，不可能无缘无故删掉，目前不用加notfound的判断
+					zlog.Error(res.Error.Error())
+					return constants.SYSTEM_ERROR, nil, -1
 				}
+				userListRsp = append(userListRsp, respond.MyUserListRespond{
+					UserId:   user.UserId,
+					UserName: user.Nickname,
+					Avatar:   user.Avatar,
+				})
+
 			}
 			rspString, err := json.Marshal(userListRsp)
 			if err != nil {
 				zlog.Error(err.Error())
 			}
-			if err := myredis.SetKeyEx("contact_user_list_"+ownerId, string(rspString), time.Minute*constants.REDIS_TIMEOUT); err != nil {
+			if err := myredis.SetKeyEx(fmt.Sprintf("friend_list_%d", ownerId), string(rspString), time.Minute*constants.REDIS_TIMEOUT); err != nil {
 				zlog.Error(err.Error())
 			}
 			return "获取用户列表成功", userListRsp, 0
@@ -87,6 +83,7 @@ func (u *userContactService) GetUserList(ownerId string) (string, []respond.MyUs
 	return "获取用户列表成功", rsp, 0
 }
 
+/*
 // LoadMyJoinedGroup 获取我加入的群聊
 func (u *userContactService) LoadMyJoinedGroup(ownerId string) (string, []respond.LoadMyJoinedGroupRespond, int) {
 	rspString, err := myredis.GetKeyNilIsErr("my_joined_group_list_" + ownerId)
@@ -148,58 +145,37 @@ func (u *userContactService) LoadMyJoinedGroup(ownerId string) (string, []respon
 	}
 	return "获取加入群成功", rsp, 0
 }
-
+*/
 // GetContactInfo 获取联系人信息
 // 调用这个接口的前提是该联系人没有处在删除或被删除，或者该用户还在群聊中
 // redis todo
-func (u *userContactService) GetContactInfo(contactId string) (string, respond.GetContactInfoRespond, int) {
-	if contactId[0] == 'G' {
-		var group model.GroupInfo
-		if res := dao.GormDB.First(&group, "uuid = ?", contactId); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, respond.GetContactInfoRespond{}, -1
-		}
-		// 没被禁用
-		if group.Status != group_status_enum.DISABLE {
-			return "获取联系人信息成功", respond.GetContactInfoRespond{
-				ContactId:        group.Uuid,
-				ContactName:      group.Name,
-				ContactAvatar:    group.Avatar,
-				ContactNotice:    group.Notice,
-				ContactAddMode:   group.AddMode,
-				ContactMembers:   group.Members,
-				ContactMemberCnt: group.MemberCnt,
-				ContactOwnerId:   group.OwnerId,
-			}, 0
-		} else {
-			zlog.Error("该群聊处于禁用状态")
-			return "该群聊处于禁用状态", respond.GetContactInfoRespond{}, -2
-		}
-	} else {
-		var user model.UserInfo
-		if res := dao.GormDB.First(&user, "uuid = ?", contactId); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, respond.GetContactInfoRespond{}, -1
-		}
-		log.Println(user)
-		if user.Status != user_status_enum.DISABLE {
-			return "获取联系人信息成功", respond.GetContactInfoRespond{
-				ContactId:        user.Uuid,
-				ContactName:      user.Nickname,
-				ContactAvatar:    user.Avatar,
-				ContactBirthday:  user.Birthday,
-				ContactEmail:     user.Email,
-				ContactPhone:     user.Telephone,
-				ContactGender:    user.Gender,
-				ContactSignature: user.Signature,
-			}, 0
-		} else {
-			zlog.Info("该用户处于禁用状态")
-			return "该用户处于禁用状态", respond.GetContactInfoRespond{}, -2
-		}
+func (u *userContactService) GetFriendInfo(friendId int64) (string, respond.UserInfoRespond, int) {
+
+	var user model.User
+	if res := dao.GormDB.First(&user, "user_id = ?", friendId); res.Error != nil {
+		zlog.Error(res.Error.Error())
+		return constants.SYSTEM_ERROR, respond.UserInfoRespond{}, -1
 	}
+	log.Println(user)
+	if user.Status != user_status_enum.DISABLE {
+		return "获取联系人信息成功", respond.UserInfoRespond{
+			UserId:    user.UserId,
+			Nickname:  user.Nickname,
+			Telephone: user.Telephone,
+			Avatar:    user.Avatar,
+			Email:     user.Email,
+			Gender:    user.Gender,
+			Birthday:  user.Birthday,
+			Signature: user.Signature,
+		}, 0
+	} else {
+		zlog.Info("该用户处于禁用状态")
+		return "该用户处于禁用状态", respond.UserInfoRespond{}, -2
+	}
+
 }
 
+/*
 // DeleteContact 删除联系人（只包含用户）
 func (u *userContactService) DeleteContact(ownerId, contactId string) (string, int) {
 	// status改变为删除
@@ -245,111 +221,63 @@ func (u *userContactService) DeleteContact(ownerId, contactId string) (string, i
 	}
 	return "删除联系人成功", 0
 }
-
+*/
 // ApplyContact 申请添加联系人
-func (u *userContactService) ApplyContact(req request.ApplyContactRequest) (string, int) {
-	if req.ContactId[0] == 'U' {
-		var user model.UserInfo
-		if res := dao.GormDB.First(&user, "uuid = ?", req.ContactId); res.Error != nil {
-			if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-				zlog.Error("用户不存在")
-				return "用户不存在", -2
-			} else {
-				zlog.Error(res.Error.Error())
-				return constants.SYSTEM_ERROR, -1
-			}
-		}
+func (u *userContactService) ApplyFriend(req request.ApplyFriendRequest) (string, int) {
 
-		if user.Status == user_status_enum.DISABLE {
-			zlog.Info("用户已被禁用")
-			return "用户已被禁用", -2
-		}
-		var contactApply model.ContactApply
-		if res := dao.GormDB.Where("user_id = ? AND contact_id = ?", req.OwnerId, req.ContactId).First(&contactApply); res.Error != nil {
-			if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-				contactApply = model.ContactApply{
-					Uuid:        fmt.Sprintf("A%s", random.GetNowAndLenRandomString(11)),
-					UserId:      req.OwnerId,
-					ContactId:   req.ContactId,
-					ContactType: contact_type_enum.USER,
-					Status:      contact_apply_status_enum.PENDING,
-					Message:     req.Message,
-					LastApplyAt: time.Now(),
-				}
-				if res := dao.GormDB.Create(&contactApply); res.Error != nil {
-					zlog.Error(res.Error.Error())
-					return constants.SYSTEM_ERROR, -1
-				}
-			} else {
-				zlog.Error(res.Error.Error())
-				return constants.SYSTEM_ERROR, -1
-			}
-		}
-		// 如果存在申请记录，先看看有没有被拉黑
-		if contactApply.Status == contact_apply_status_enum.BLACK {
-			return "对方已将你拉黑", -2
-		}
-		contactApply.LastApplyAt = time.Now()
-		contactApply.Status = contact_apply_status_enum.PENDING
-
-		if res := dao.GormDB.Save(&contactApply); res.Error != nil {
+	var user model.User
+	if res := dao.GormDB.First(&user, "user_id = ?", req.FriendId); res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			zlog.Error("用户不存在")
+			return "用户不存在", -2
+		} else {
 			zlog.Error(res.Error.Error())
 			return constants.SYSTEM_ERROR, -1
 		}
-		return "申请成功", 0
-	} else if req.ContactId[0] == 'G' {
-		var group model.GroupInfo
-		if res := dao.GormDB.First(&group, "uuid = ?", req.ContactId); res.Error != nil {
-			if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-				zlog.Error("群聊不存在")
-				return "群聊不存在", -2
-			} else {
-				zlog.Error(res.Error.Error())
-				return constants.SYSTEM_ERROR, -1
-			}
-		}
-		if group.Status == group_status_enum.DISABLE {
-			zlog.Info("群聊已被禁用")
-			return "群聊已被禁用", -2
-		}
-		var contactApply model.ContactApply
-		if res := dao.GormDB.Where("user_id = ? AND contact_id = ?", req.OwnerId, req.ContactId).First(&contactApply); res.Error != nil {
-			if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-				contactApply = model.ContactApply{
-					Uuid:        fmt.Sprintf("A%s", random.GetNowAndLenRandomString(11)),
-					UserId:      req.OwnerId,
-					ContactId:   req.ContactId,
-					ContactType: contact_type_enum.GROUP,
-					Status:      contact_apply_status_enum.PENDING,
-					Message:     req.Message,
-					LastApplyAt: time.Now(),
-				}
-				if res := dao.GormDB.Create(&contactApply); res.Error != nil {
-					zlog.Error(res.Error.Error())
-					return constants.SYSTEM_ERROR, -1
-				}
-			} else {
-				zlog.Error(res.Error.Error())
-				return constants.SYSTEM_ERROR, -1
-			}
-		}
-		contactApply.LastApplyAt = time.Now()
-
-		if res := dao.GormDB.Save(&contactApply); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		return "申请成功", 0
-	} else {
-		return "用户/群聊不存在", -2
 	}
 
+	if user.Status == user_status_enum.DISABLE {
+		zlog.Info("用户已被禁用")
+		return "用户已被禁用", -2
+	}
+	var relationApply model.RelationApply
+	if res := dao.GormDB.Where("user_id = ? AND contact_id = ?", req.UserId, req.FriendId).First(&relationApply); res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			relationApply = model.RelationApply{
+				Uuid:        fmt.Sprintf("A%s", random.GetNowAndLenRandomString(11)),
+				UserId:      req.UserId,
+				FriendId:    req.FriendId,
+				Status:      contact_apply_status_enum.PENDING,
+				Message:     req.Message,
+				LastApplyAt: time.Now(),
+			}
+			if res := dao.GormDB.Create(&relationApply); res.Error != nil {
+				zlog.Error(res.Error.Error())
+				return constants.SYSTEM_ERROR, -1
+			}
+		} else {
+			zlog.Error(res.Error.Error())
+			return constants.SYSTEM_ERROR, -1
+		}
+	}
+	// 如果存在申请记录，先看看有没有被拉黑
+	if relationApply.Status == contact_apply_status_enum.BLACK {
+		return "对方已将你拉黑", -2
+	}
+	relationApply.LastApplyAt = time.Now()
+	relationApply.Status = contact_apply_status_enum.PENDING
+
+	if res := dao.GormDB.Save(&relationApply); res.Error != nil {
+		zlog.Error(res.Error.Error())
+		return constants.SYSTEM_ERROR, -1
+	}
+	return "申请成功", 0
 }
 
 // GetNewContactList 获取新的联系人申请列表
-func (u *userContactService) GetNewContactList(ownerId string) (string, []respond.NewContactListRespond, int) {
-	var contactApplyList []model.ContactApply
-	if res := dao.GormDB.Where("contact_id = ? AND status = ?", ownerId, contact_apply_status_enum.PENDING).Find(&contactApplyList); res.Error != nil {
+func (u *userContactService) GetNewApplyList(ownerId int64) (string, []respond.NewContactListRespond, int) {
+	var contactApplyList []model.RelationApply
+	if res := dao.GormDB.Where("friend_id = ? AND status = ?", ownerId, contact_apply_status_enum.PENDING).Find(&contactApplyList); res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 			zlog.Info("没有在申请的联系人")
 			return "没有在申请的联系人", nil, 0
@@ -368,14 +296,13 @@ func (u *userContactService) GetNewContactList(ownerId string) (string, []respon
 			message = "申请理由：" + contactApply.Message
 		}
 		newContact := respond.NewContactListRespond{
-			ContactId: contactApply.Uuid,
-			Message:   message,
+			Message: message,
 		}
-		var user model.UserInfo
-		if res := dao.GormDB.First(&user, "uuid = ?", contactApply.UserId); res.Error != nil {
+		var user model.User
+		if res := dao.GormDB.First(&user, "user_id = ?", contactApply.UserId); res.Error != nil {
 			return constants.SYSTEM_ERROR, nil, -1
 		}
-		newContact.ContactId = user.Uuid
+		newContact.ContactId = user.UserId
 		newContact.ContactName = user.Nickname
 		newContact.ContactAvatar = user.Avatar
 		rsp = append(rsp, newContact)
@@ -383,6 +310,7 @@ func (u *userContactService) GetNewContactList(ownerId string) (string, []respon
 	return "获取成功", rsp, 0
 }
 
+/*
 // GetAddGroupList 获取新的加群列表
 // 前端已经判断调用接口的用户是群主，也只有群主才能调用这个接口
 func (u *userContactService) GetAddGroupList(groupId string) (string, []respond.AddGroupListRespond, int) {
@@ -419,108 +347,63 @@ func (u *userContactService) GetAddGroupList(groupId string) (string, []respond.
 	}
 	return "获取成功", rsp, 0
 }
-
+*/
 // PassContactApply 通过联系人申请
-func (u *userContactService) PassContactApply(ownerId string, contactId string) (string, int) {
+func (u *userContactService) PassRelationApply(ownerId int64, friendId int64) (string, int) {
 	// ownerId 如果是用户的话就是登录用户，如果是群聊的话就是群聊id
-	var contactApply model.ContactApply
-	if res := dao.GormDB.Where("contact_id = ? AND user_id = ?", ownerId, contactId).First(&contactApply); res.Error != nil {
+	var contactApply model.RelationApply
+	if res := dao.GormDB.Where("friend_id = ? AND user_id = ?", ownerId, friendId).First(&contactApply); res.Error != nil {
 		zlog.Error(res.Error.Error())
 		return constants.SYSTEM_ERROR, -1
 	}
-	if ownerId[0] == 'U' {
-		var user model.UserInfo
-		if res := dao.GormDB.Where("uuid = ?", contactId).Find(&user); res.Error != nil {
-			zlog.Error(res.Error.Error())
-		}
-		if user.Status == user_status_enum.DISABLE {
-			zlog.Error("用户已被禁用")
-			return "用户已被禁用", -2
-		}
-		contactApply.Status = contact_apply_status_enum.AGREE
-		if res := dao.GormDB.Save(&contactApply); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		newContact := model.UserContact{
-			UserId:      ownerId,
-			ContactId:   contactId,
-			ContactType: contact_type_enum.USER,     // 用户
-			Status:      contact_status_enum.NORMAL, // 正常
-			CreatedAt:   time.Now(),
-			UpdateAt:    time.Now(),
-		}
-		if res := dao.GormDB.Create(&newContact); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		anotherContact := model.UserContact{
-			UserId:      contactId,
-			ContactId:   ownerId,
-			ContactType: contact_type_enum.USER,     // 用户
-			Status:      contact_status_enum.NORMAL, // 正常
-			CreatedAt:   newContact.CreatedAt,
-			UpdateAt:    newContact.UpdateAt,
-		}
-		if res := dao.GormDB.Create(&anotherContact); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		if err := myredis.DelKeysWithPattern("contact_user_list_" + ownerId); err != nil {
-			zlog.Error(err.Error())
-		}
-		return "已添加该联系人", 0
-	} else {
-		var group model.GroupInfo
-		if res := dao.GormDB.Where("uuid = ?", ownerId).Find(&group); res.Error != nil {
-			zlog.Error(res.Error.Error())
-		}
-		if group.Status == group_status_enum.DISABLE {
-			zlog.Error("群聊已被禁用")
-			return "群聊已被禁用", -2
-		}
-		contactApply.Status = contact_apply_status_enum.AGREE
-		if res := dao.GormDB.Save(&contactApply); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		// 群聊就只用创建一个UserContact，因为一个UserContact足以表达双方的状态
-		newContact := model.UserContact{
-			UserId:      contactId,
-			ContactId:   ownerId,
-			ContactType: contact_type_enum.GROUP,    // 用户
-			Status:      contact_status_enum.NORMAL, // 正常
-			CreatedAt:   time.Now(),
-			UpdateAt:    time.Now(),
-		}
-		if res := dao.GormDB.Create(&newContact); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		var members []string
-		if err := json.Unmarshal(group.Members, &members); err != nil {
-			zlog.Error(err.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		members = append(members, contactId)
-		group.MemberCnt = len(members)
-		group.Members, _ = json.Marshal(members)
-		if res := dao.GormDB.Save(&group); res.Error != nil {
-			zlog.Error(res.Error.Error())
-			return constants.SYSTEM_ERROR, -1
-		}
-		if err := myredis.DelKeysWithPattern("my_joined_group_list_" + ownerId); err != nil {
-			zlog.Error(err.Error())
-		}
-		return "已通过加群申请", 0
+
+	var user model.User
+	if res := dao.GormDB.Where("user_id = ?", friendId).Find(&user); res.Error != nil {
+		zlog.Error(res.Error.Error())
 	}
+	if user.Status == user_status_enum.DISABLE {
+		zlog.Error("用户已被禁用")
+		return "用户已被禁用", -2
+	}
+	contactApply.Status = contact_apply_status_enum.AGREE
+	if res := dao.GormDB.Save(&contactApply); res.Error != nil {
+		zlog.Error(res.Error.Error())
+		return constants.SYSTEM_ERROR, -1
+	}
+	newContact := model.Relation{
+		UserId:   ownerId,
+		FriendId: friendId,
+
+		Status: contact_status_enum.NORMAL, // 正常
+
+	}
+	if res := dao.GormDB.Create(&newContact); res.Error != nil {
+		zlog.Error(res.Error.Error())
+		return constants.SYSTEM_ERROR, -1
+	}
+	anotherContact := model.Relation{
+		UserId:   friendId,
+		FriendId: ownerId,
+
+		Status: contact_status_enum.NORMAL, // 正常
+
+	}
+	if res := dao.GormDB.Create(&anotherContact); res.Error != nil {
+		zlog.Error(res.Error.Error())
+		return constants.SYSTEM_ERROR, -1
+	}
+	if err := myredis.DelKeysWithPattern(fmt.Sprintf("friend_list_%d", ownerId)); err != nil {
+		zlog.Error(err.Error())
+	}
+	return "已添加该联系人", 0
+
 }
 
 // RefuseContactApply 拒绝联系人申请
-func (u *userContactService) RefuseContactApply(ownerId string, contactId string) (string, int) {
+func (u *userContactService) RefuseRelationApply(ownerId int64, contactId int64) (string, int) {
 	// ownerId 如果是用户的话就是登录用户，如果是群聊的话就是群聊id
-	var contactApply model.ContactApply
-	if res := dao.GormDB.Where("contact_id = ? AND user_id = ?", ownerId, contactId).First(&contactApply); res.Error != nil {
+	var contactApply model.RelationApply
+	if res := dao.GormDB.Where("friend_id = ? AND user_id = ?", ownerId, contactId).First(&contactApply); res.Error != nil {
 		zlog.Error(res.Error.Error())
 		return constants.SYSTEM_ERROR, -1
 	}
@@ -529,14 +412,12 @@ func (u *userContactService) RefuseContactApply(ownerId string, contactId string
 		zlog.Error(res.Error.Error())
 		return constants.SYSTEM_ERROR, -1
 	}
-	if ownerId[0] == 'U' {
-		return "已拒绝该联系人申请", 0
-	} else {
-		return "已拒绝该加群申请", 0
-	}
+
+	return "已拒绝该联系人申请", 0
 
 }
 
+/*
 // BlackContact 拉黑联系人
 func (u *userContactService) BlackContact(ownerId string, contactId string) (string, int) {
 	// 拉黑
@@ -599,11 +480,11 @@ func (u *userContactService) CancelBlackContact(ownerId string, contactId string
 	}
 	return "已解除拉黑该联系人", 0
 }
-
+*/
 // BlackApply 拉黑申请
-func (u *userContactService) BlackApply(ownerId string, contactId string) (string, int) {
-	var contactApply model.ContactApply
-	if res := dao.GormDB.Where("contact_id = ? AND user_id = ?", ownerId, contactId).First(&contactApply); res.Error != nil {
+func (u *userContactService) BlackApply(ownerId int64, contactId int64) (string, int) {
+	var contactApply model.RelationApply
+	if res := dao.GormDB.Where("friend_id = ? AND user_id = ?", ownerId, contactId).First(&contactApply); res.Error != nil {
 		zlog.Error(res.Error.Error())
 		return constants.SYSTEM_ERROR, -1
 	}

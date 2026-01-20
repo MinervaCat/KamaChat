@@ -35,7 +35,7 @@ export default {
     const logout = async () => {
       store.commit("cleanUserInfo");
       const req = {
-        owner_id: data.userInfo.uuid,
+        owner_id: store.state.userInfo.uuid,
       };
       const rsp = await axios.post(
         store.state.backendUrl + "/user/wsLogout",
@@ -68,7 +68,7 @@ export default {
           console.log("WebSocket连接已关闭");
         console.log("连接信令服务器断开");
         };
-        store.state.socket.onerror = () => {
+        store.state.socket.onerror = (error) => {
           console.log("WebSocket连接发生错误");console.log("连接信令服务器失败，错误信息：", error);
         };
         console.log(store.state.socket);

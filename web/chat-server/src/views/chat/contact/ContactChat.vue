@@ -33,9 +33,9 @@
                     </template>
                   </el-sub-menu>
                   <el-menu-item
-                    v-for="user in userSessionList"
-                    :key="user.user_id"
-                    @click="handleToChatUser(user)"
+                    v-for="conversation in userSessionList"
+                    :key="conversation.conversation_id"
+                    @click="handleToChat(conversation)"
                   >
                     <img :src="user.avatar" class="sessionlist-avatar" />
                     {{ user.user_name }}
@@ -950,6 +950,7 @@ import SmallModal from "@/components/SmallModal.vue";
 import NavigationModal from "@/components/NavigationModal.vue";
 import { ElMessage, ElMessageBox, ElScrollbar } from "element-plus";
 import { ElNotification } from "element-plus";
+import {useMessageStore} from "@/store/msgStore";
 export default {
   name: "ContactChat",
   components: {
@@ -961,6 +962,7 @@ export default {
   setup() {
     const router = useRouter();
     const store = useStore();
+    const messageStore = useMessageStore()
     const data = reactive({
       chatMessage: "",
       chatName: "",
@@ -1049,13 +1051,15 @@ export default {
     });
     //这是/chat/:id 的id改变时会调用
     onBeforeRouteUpdate(async (to, from, next) => {
-      await getChatContactInfo(to.params.id);
-      await getSessionId(router.currentRoute.value.params.id);
-      if (data.contactInfo.contact_id[0] == "U") {
-        await getMessageList();
-      } else {
-        await getGroupMessageList();
-      }
+      // await getChatContactInfo(to.params.id);
+      // await getSessionId(router.currentRoute.value.params.id);
+      // if (data.contactInfo.contact_id[0] == "U") {
+      //   await getMessageList();
+      // } else {
+      //   await getGroupMessageList();
+      // }
+      data.messageList = messageStore.getSessionMsg(to.params.id)
+      // await getMessageList(to.params.id);
       console.log(data.sessionId);
       store.state.socket.onmessage = (jsonMessage) => {
         const message = JSON.parse(jsonMessage.data);
@@ -1075,6 +1079,7 @@ export default {
               data.messageList = [];
             }
             data.messageList.push(message);
+            // messageStore.addMessage
             scrollToBottom();
           }
           // 其他接受的消息都不显示在messageList中，而是通过切换页面或刷新页面getMessageList来获取
@@ -1138,15 +1143,16 @@ export default {
     onMounted(async () => {
       try {
         /*  */
-        console.log(router.currentRoute.value.params.id);
-        await getChatContactInfo(router.currentRoute.value.params.id);
-        await getSessionId(router.currentRoute.value.params.id);
-        console.log(data.contactInfo);
-        if (data.contactInfo.contact_id[0] == "U") {
-          await getMessageList();
-        } else {
-          await getGroupMessageList();
-        }
+        // console.log(router.currentRoute.value.params.id);
+        // await getChatContactInfo(router.currentRoute.value.params.id);
+        // await getSessionId(router.currentRoute.value.params.id);
+        // console.log(data.contactInfo);
+        // if (data.contactInfo.contact_id[0] == "U") {
+        //   await getMessageList();
+        // } else {
+        //   await getGroupMessageList();
+        // }
+        data.messageList = messageStore.getSessionMsg(router.currentRoute.value.params.id);
         console.log(data.sessionId);
         store.state.socket.onmessage = (jsonMessage) => {
           const message = JSON.parse(jsonMessage.data);
@@ -1328,12 +1334,13 @@ export default {
       }
     };
 
-    
 
+    const handleToChat = (conversation) => {
+      router.push("/chat/" + conversation.converation_id);
+    }
     const handleToChatUser = async (user) => {
       router.push("/chat/" + user.user_id);
     };
-
     const handleToChatGroup = async (group) => {
       router.push("/chat/" + group.group_id);
     };
@@ -1342,7 +1349,7 @@ export default {
       try {
         data.ownListReq.owner_id = data.userInfo.uuid;
         const userSessionListRsp = await axios.post(
-          store.state.backendUrl + "/session/getUserSessionList",
+          store.state.backendUrl + "/conversation/getConversationList",
           data.ownListReq
         );
         if (userSessionListRsp.data.data) {
@@ -2278,6 +2285,7 @@ export default {
       showAddGroupModal,
       quitAddGroupModal,
       handleToChatUser,
+      handleToChat,
       handleToChatGroup,
       handleShowUserSessionList,
       handleShowGroupSessionList,

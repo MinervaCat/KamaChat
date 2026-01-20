@@ -59,12 +59,12 @@ func (u *userServer) Start() {
 			zlog.Error(err.Error())
 		}
 		log.Println("原消息为：", data, "反序列化后为：", userMsg)
-
+		userMsg.Seq = u.userSeq[userMsg.UserId]
 		userMsgList := &model.UserMsgList{
 			UserId:         userMsg.UserId,
 			MsgId:          userMsg.MsgId,
 			ConversationId: userMsg.ConversationId,
-			Seq:            u.getSeq(userMsg.UserId),
+			Seq:            userMsg.Seq,
 		}
 
 		if res := dao.GormDB.Create(&userMsgList); res.Error != nil {

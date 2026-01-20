@@ -8,7 +8,7 @@ type RegisterRequest struct {
 }
 
 type RegisterRequest2 struct {
-	Telephone int64  `json:"telephone"`
+	Telephone string `json:"telephone"`
 	Password  string `json:"password"`
 	Nickname  string `json:"nickname"`
 }

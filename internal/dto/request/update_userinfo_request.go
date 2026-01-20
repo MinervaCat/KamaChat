@@ -1,7 +1,7 @@
 package request
 
 type UpdateUserInfoRequest struct {
-	Uuid      string `json:"uuid"`
+	UserId    int64  `json:"user_id"`
 	Email     string `json:"email"`
 	Nickname  string `json:"nickname"`
 	Birthday  string `json:"birthday"`

@@ -1,26 +1,6 @@
 package gorm
 
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"github.com/go-redis/redis/v8"
-	"gorm.io/gorm"
-	"kama_chat_server/internal/dao"
-	"kama_chat_server/internal/dto/request"
-	"kama_chat_server/internal/dto/respond"
-	"kama_chat_server/internal/model"
-	myredis "kama_chat_server/internal/service/redis"
-	"kama_chat_server/pkg/constants"
-	"kama_chat_server/pkg/enum/contact/contact_status_enum"
-	"kama_chat_server/pkg/enum/contact/contact_type_enum"
-	"kama_chat_server/pkg/enum/group_info/group_status_enum"
-	"kama_chat_server/pkg/util/random"
-	"kama_chat_server/pkg/zlog"
-	"log"
-	"time"
-)
-
+/*
 type groupInfoService struct {
 }
 
@@ -736,3 +716,4 @@ func (g *groupInfoService) RemoveGroupMembers(req request.RemoveGroupMembersRequ
 	}
 	return "移除群聊成员成功", 0
 }
+*/

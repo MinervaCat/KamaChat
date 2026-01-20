@@ -1,25 +1,6 @@
 package gorm
 
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"github.com/go-redis/redis/v8"
-	"gorm.io/gorm"
-	"kama_chat_server/internal/dao"
-	"kama_chat_server/internal/dto/request"
-	"kama_chat_server/internal/dto/respond"
-	"kama_chat_server/internal/model"
-	myredis "kama_chat_server/internal/service/redis"
-	"kama_chat_server/pkg/constants"
-	"kama_chat_server/pkg/enum/contact/contact_status_enum"
-	"kama_chat_server/pkg/enum/group_info/group_status_enum"
-	"kama_chat_server/pkg/enum/user_info/user_status_enum"
-	"kama_chat_server/pkg/util/random"
-	"kama_chat_server/pkg/zlog"
-	"time"
-)
-
+/*
 type sessionService struct {
 }
 
@@ -115,42 +96,42 @@ func (s *sessionService) CheckOpenSessionAllowed(sendId, receiveId string) (stri
 }
 
 // DeleteSession 删除会话
-
-// OpenSession 打开会话
-func (s *sessionService) OpenSession(req request.OpenSessionRequest) (string, string, int) {
-	rspString, err := myredis.GetKeyWithPrefixNilIsErr("session_" + req.SendId + "_" + req.ReceiveId)
-	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			var session model.Session
-			if res := dao.GormDB.Where("send_id = ? and receive_id = ?", req.SendId, req.ReceiveId).First(&session); res.Error != nil {
-				if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-					zlog.Info("会话没有找到，将新建会话")
-					createReq := request.CreateSessionRequest{
-						SendId:    req.SendId,
-						ReceiveId: req.ReceiveId,
-					}
-					return s.CreateSession(createReq)
-				}
-			}
-			//rspString, err := json.Marshal(session)
-			//if err != nil {
-			//	zlog.Error(err.Error())
-			//}
-			//if err := myredis.SetKeyEx("session_"+req.SendId+"_"+req.ReceiveId+"_"+session.Uuid, string(rspString), time.Minute*constants.REDIS_TIMEOUT); err != nil {
-			//	zlog.Error(err.Error())
-			//}
-			return "会话创建成功", session.Uuid, 0
-		} else {
-			zlog.Error(err.Error())
-			return constants.SYSTEM_ERROR, "", -1
-		}
-	}
-	var session model.Session
-	if err := json.Unmarshal([]byte(rspString), &session); err != nil {
-		zlog.Error(err.Error())
-	}
-	return "会话创建成功", session.Uuid, 0
-}
+//
+//// OpenSession 打开会话
+//func (s *sessionService) OpenConversation(req request.UserFriendRequest) (string, string, int) {
+//	rspString, err := myredis.GetKeyWithPrefixNilIsErr(fmt.Sprintf("conversation_%d_%d", req.UserId, req.FriendId))
+//	if err != nil {
+//		if errors.Is(err, redis.Nil) {
+//			var session model.Conversation
+//			if res := dao.GormDB.Where("send_id = ? and receive_id = ?", req.SendId, req.ReceiveId).First(&session); res.Error != nil {
+//				if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+//					zlog.Info("会话没有找到，将新建会话")
+//					createReq := request.CreateSessionRequest{
+//						SendId:    req.SendId,
+//						ReceiveId: req.ReceiveId,
+//					}
+//					return s.CreateSession(createReq)
+//				}
+//			}
+//			//rspString, err := json.Marshal(session)
+//			//if err != nil {
+//			//	zlog.Error(err.Error())
+//			//}
+//			//if err := myredis.SetKeyEx("session_"+req.SendId+"_"+req.ReceiveId+"_"+session.Uuid, string(rspString), time.Minute*constants.REDIS_TIMEOUT); err != nil {
+//			//	zlog.Error(err.Error())
+//			//}
+//			return "会话创建成功", session.Uuid, 0
+//		} else {
+//			zlog.Error(err.Error())
+//			return constants.SYSTEM_ERROR, "", -1
+//		}
+//	}
+//	var session model.Session
+//	if err := json.Unmarshal([]byte(rspString), &session); err != nil {
+//		zlog.Error(err.Error())
+//	}
+//	return "会话创建成功", session.Uuid, 0
+//}
 
 // GetUserSessionList 获取用户会话列表
 func (s *sessionService) GetUserSessionList(ownerId string) (string, []respond.UserSessionListRespond, int) {
@@ -269,3 +250,4 @@ func (s *sessionService) DeleteSession(ownerId, sessionId string) (string, int) 
 	}
 	return "删除成功", 0
 }
+*/

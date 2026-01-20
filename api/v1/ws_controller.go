@@ -35,7 +35,7 @@ func WsLogin(c *gin.Context) {
 
 // WsLogout wss登出
 func WsLogout(c *gin.Context) {
-	var req request.WsLogoutRequest
+	var req request.UserRequest
 	if err := c.BindJSON(&req); err != nil {
 		zlog.Error(err.Error())
 		c.JSON(http.StatusOK, gin.H{
@@ -44,15 +44,6 @@ func WsLogout(c *gin.Context) {
 		})
 		return
 	}
-	userId, err := strconv.ParseInt(req.OwnerId, 10, 64)
-	if err != nil {
-		zlog.Error("Id转换失败")
-		c.JSON(http.StatusOK, gin.H{
-			"code":    500,
-			"message": constants.SYSTEM_ERROR,
-		})
-		return
-	}
-	message, ret := push.ClientLogout(userId)
+	message, ret := push.ClientLogout(req.UserId)
 	JsonBack(c, message, ret, nil)
 }

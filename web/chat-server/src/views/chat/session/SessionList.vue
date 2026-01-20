@@ -33,9 +33,9 @@
                     </template>
                   </el-sub-menu>
                   <el-menu-item
-                    v-for="user in userSessionList"
-                    :key="user.user_id"
-                    @click="handleToChatUser(user)"
+                    v-for="conversation in userSessionList"
+                    :key="conversation.conversation_id"
+                    @click="handleToChat(conversation)"
                   >
                     <img :src="user.avatar" class="sessionlist-avatar" />
                     {{ user.user_name }}
@@ -272,7 +272,7 @@ export default {
         avatar: "",
       },
       ownListReq: {
-        owner_id: "",
+        owner_id: 0,
       },
       userSessionList: [],
       groupSessionList: [],
@@ -285,6 +285,9 @@ export default {
     const handleToChatUser = (user) => {
       router.push("/chat/" + user.user_id);
     };
+    const handleToChat = (conversation) => {
+      router.push("/chat/" + conversation.converation_id);
+    }
     const handleToChatGroup = (group) => {
       router.push("/chat/" + group.group_id);
     };
@@ -293,7 +296,7 @@ export default {
       try {
         data.ownListReq.owner_id = data.userInfo.uuid;
         const userSessionListRsp = await axios.post(
-          store.state.backendUrl + "/session/getUserSessionList",
+          store.state.backendUrl + "/conversation/getConversationList",
           data.ownListReq
         );
         if (userSessionListRsp.data.data) {
@@ -356,6 +359,7 @@ export default {
       router,
       handleToChatUser,
       handleToChatGroup,
+      handleToChat,
       handleShowUserSessionList,
       handleHideUserSessionList,
       handleShowGroupSessionList,

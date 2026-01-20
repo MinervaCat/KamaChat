@@ -59,6 +59,8 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { useStore } from "vuex";
+import {useMessageStore} from "@/store/msgStore";
+import store from "@/store";
 export default {
   name: "Login",
   setup() {
@@ -70,6 +72,7 @@ export default {
     });
     const router = useRouter();
     const store = useStore();
+    const messageStore = useMessageStore()
     const handleLogin = async () => {
       try {
         if (!data.loginData.telephone || !data.loginData.password) {
@@ -98,6 +101,8 @@ export default {
                 store.state.backendUrl + response.data.data.avatar;
             }
             store.commit("setUserInfo", response.data.data);
+            messageStore.setCurrentUserId(store.state.userInfo.user_id)
+            messageStore.fetchAllMessage()
             // 准备创建websocket连接
             const wsUrl =
               store.state.wsUrl + "/wss?client_id=" + response.data.data.uuid;
