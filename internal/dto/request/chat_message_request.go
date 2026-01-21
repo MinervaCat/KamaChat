@@ -12,5 +12,4 @@ type ChatMessageRequest struct {
 	FileSize       string `json:"file_size"`
 	FileType       string `json:"file_type"`
 	FileName       string `json:"file_name"`
-	AVdata         string `json:"av_data"`
 }

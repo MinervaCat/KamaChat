@@ -37,14 +37,14 @@ func (k *kafkaService) KafkaInit2() {
 func (k *kafkaService) KafkaInit() {
 	//k.CreateTopic()
 	kafkaConfig := myconfig.GetConfig().KafkaConfig
-	k.ConversationWriter = &kafka.Writer{
-		Addr:                   kafka.TCP(kafkaConfig.HostPort),
-		Topic:                  kafkaConfig.ConversationImTopic,
-		Balancer:               &kafka.Hash{},
-		WriteTimeout:           kafkaConfig.Timeout * time.Second,
-		RequiredAcks:           kafka.RequireNone,
-		AllowAutoTopicCreation: false,
-	}
+	//k.ConversationWriter = &kafka.Writer{
+	//	Addr:                   kafka.TCP(kafkaConfig.HostPort),
+	//	Topic:                  kafkaConfig.ConversationImTopic,
+	//	Balancer:               &kafka.Hash{},
+	//	WriteTimeout:           kafkaConfig.Timeout * time.Second,
+	//	RequiredAcks:           kafka.RequireNone,
+	//	AllowAutoTopicCreation: false,
+	//}
 	k.ConversationReader = kafka.NewReader(kafka.ReaderConfig{
 		Brokers:        []string{kafkaConfig.HostPort},
 		Topic:          kafkaConfig.ConversationImTopic,

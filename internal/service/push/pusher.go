@@ -72,7 +72,7 @@ func (p *pusher) Start() {
 		case client := <-p.Login:
 			{
 				p.Clients[client.UserId] = client
-				zlog.Info(fmt.Sprintf("欢迎来到kama聊天服务器，亲爱的用户%s\n", client.UserId))
+				zlog.Info(fmt.Sprintf("欢迎来到kama聊天服务器，亲爱的用户%v\n", client.UserId))
 				err := client.Conn.WriteMessage(websocket.TextMessage, []byte("欢迎来到kama聊天服务器"))
 				if err != nil {
 					log.Fatal(err.Error())
@@ -81,7 +81,7 @@ func (p *pusher) Start() {
 		case client := <-p.Logout:
 			{
 				delete(p.Clients, client.UserId)
-				zlog.Info(fmt.Sprintf("用户%s退出登录\n", client.UserId))
+				zlog.Info(fmt.Sprintf("用户%v退出登录\n", client.UserId))
 				if err := client.Conn.WriteMessage(websocket.TextMessage, []byte("已退出登录")); err != nil {
 					log.Fatal(err.Error())
 				}

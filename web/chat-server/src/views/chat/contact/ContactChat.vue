@@ -1513,7 +1513,6 @@ export default {
       }
       router.push("/chat/sessionlist");
     };
-    //todo sendMessage
     const sendMessage = () => {
       const chatMessageRequest = {
         session_id: data.sessionId,

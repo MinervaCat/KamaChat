@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	log.Println("服务开始")
+	log.Println("chat_server服务开始")
 	//conf := config.GetConfig()
 	//host := conf.MainConfig.Host
 	//port := conf.MainConfig.Port

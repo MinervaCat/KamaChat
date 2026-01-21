@@ -151,13 +151,13 @@
                   ]"
                 >
                   <el-input
-                    v-model="applyContactReq.contact_id"
-                    placeholder="请填写申请的用户/群聊id"
+                    v-model="applyFriendReq.friend_id"
+                    placeholder="请填写申请的用户id"
                   />
                 </el-form-item>
                 <el-form-item prop="message" label="申请消息">
                   <el-input
-                    v-model="applyContactReq.message"
+                    v-model="applyFriendReq.message"
                     placeholder="选填，填写更容易通过"
                     type="textarea"
                     show-word-limit
@@ -406,13 +406,13 @@ export default {
       contactUserList: [],
       myGroupList: [],
       myJoinedGroupList: [],
-      applyContactReq: {
-        owner_id: "",
-        contact_id: "",
+      applyFriendReq: {
+        user_id: "",
+        friend_id: "",
         message: "",
       },
-      ownListReq: {
-        owner_id: "",
+      userListReq: {
+        user_id: store.state.userInfo.user_id,
       },
       newContactList: [],
       applyContent: "",
@@ -485,11 +485,9 @@ export default {
         ElMessage.error("请输入申请用户/群组id");
         return;
       }
-      if (data.applyContactReq.contact_id[0] == "G") {
-        handleApplyGroup();
-      } else {
-        handleApplyContact();
-      }
+
+      handleApplyContact();
+
     };
 
     const showNewContactModal = () => {
@@ -542,10 +540,10 @@ export default {
     };
     const handleApplyContact = async () => {
       try {
-        data.applyContactReq.owner_id = data.userInfo.uuid;
+        data.applyFriendReq.user_id = data.userInfo.user_id;
         const rsp = await axios.post(
           store.state.backendUrl + "/contact/applyContact",
-          data.applyContactReq
+          data.applyFriendReq
         );
         console.log(rsp);
         if (rsp.data.code == 200) {
@@ -562,10 +560,10 @@ export default {
     };
     const handleShowUserList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.uuid;
+        data.userListReq.user_id = data.userInfo.user_id;
         const getUserListRsp = await axios.post(
           store.state.backendUrl + "/contact/getUserList",
-          data.ownListReq
+          data.userListReq
         );
         if (getUserListRsp.data.data) {
           for (let i = 0; i < getUserListRsp.data.data.length; i++) {
