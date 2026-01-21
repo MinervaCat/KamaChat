@@ -481,7 +481,7 @@ export default {
       data.isApplyContactModalVisible = false;
     };
     const closeApplyContactModal = () => {
-      if (data.applyContactReq.contact_id == "") {
+      if (data.applyFriendReq.friend_id == "") {
         ElMessage.error("请输入申请用户/群组id");
         return;
       }

@@ -14,7 +14,7 @@
         <div class="owner-info-window">
           <div class="my-homepage-title"><h2>我的主页</h2></div>
 
-          <p class="owner-prefix">用户id：{{ userInfo.uuid }}</p>
+          <p class="owner-prefix">用户id：{{ userInfo.user_id }}</p>
           <p class="owner-prefix">昵称：{{ userInfo.nickname }}</p>
           <p class="owner-prefix">电话：{{ userInfo.telephone }}</p>
           <p class="owner-prefix">邮箱：{{ userInfo.email }}</p>
@@ -152,7 +152,7 @@ export default {
     const data = reactive({
       userInfo: store.state.userInfo,
       updateInfo: {
-        uuid: "",
+        user_id: 0,
         nickname: "",
         email: "",
         birthday: "",
@@ -224,7 +224,7 @@ export default {
       data.isMyInfoModalVisible = false;
       data.fileList = [];
       data.cnt = 0;
-      data.updateInfo.uuid = data.userInfo.user_id;
+      data.updateInfo.user_id = data.userInfo.user_id;
       store.commit("setUserInfo", data.userInfo);
       try {
         const rsp = await axios.post(
