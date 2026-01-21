@@ -1059,7 +1059,7 @@ export default {
       //   await getGroupMessageList();
       // }
       data.messageList = messageStore.getSessionMsg(router.currentRoute.value.params.id);
-      console.log(".value.params.id为", router.currentRoute.value.params.id);
+
       console.log(data.messageList)
       store.state.socket.onmessage = (jsonMessage) => {
         const message = JSON.parse(jsonMessage.data);
@@ -1154,7 +1154,6 @@ export default {
         // }
         data.messageList = messageStore.getSessionMsg(router.currentRoute.value.params.id);
 
-        console.log("router", router);
         console.log(data.messageList)
         store.state.socket.onmessage = (jsonMessage) => {
           const message = JSON.parse(jsonMessage.data);
@@ -1514,6 +1513,7 @@ export default {
       }
       router.push("/chat/sessionlist");
     };
+    //todo sendMessage
     const sendMessage = () => {
       const chatMessageRequest = {
         session_id: data.sessionId,

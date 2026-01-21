@@ -46,7 +46,6 @@ func init() {
 }
 
 func (p *pusher) Start() {
-	log.Println("Pusher开始启动")
 	zlog.Info("Pusher开始启动")
 	listen, err := net.Listen("tcp", ":9090")
 	if err != nil {
@@ -168,7 +167,7 @@ func NewClientInit(c *gin.Context, userId int64) {
 	}
 
 	Pusher.Login <- client
-
+	zlog.Info("准备启动read&write")
 	go client.Read()
 	go client.Write()
 	zlog.Info("ws连接成功")

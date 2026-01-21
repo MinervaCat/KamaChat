@@ -160,7 +160,7 @@ func (u *userInfoService) checkTelephoneExist(telephone string) (string, int) {
 }
 
 // Register 注册，返回(message, register_respond_string, error)
-func (u *userInfoService) Register(registerReq request.RegisterRequest2) (string, *respond.RegisterRespond, int) {
+func (u *userInfoService) Register(registerReq request.RegisterRequest) (string, *respond.RegisterRespond, int) {
 	//key := "auth_code_" + registerReq.Telephone
 	//code, err := myredis.GetKey(key)
 	//if err != nil {

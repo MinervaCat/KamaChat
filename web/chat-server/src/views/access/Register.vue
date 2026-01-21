@@ -121,8 +121,7 @@ export default {
         if (
           !data.registerData.nickname ||
           !data.registerData.telephone ||
-          !data.registerData.password ||
-          !data.registerData.sms_code
+          !data.registerData.password
         ) {
           ElMessage.error("请填写完整注册信息。");
           return;
@@ -153,7 +152,7 @@ export default {
           store.commit("setUserInfo", response.data.data);
           // 准备创建websocket连接
           const wsUrl =
-            store.state.wsUrl + "/wss?client_id=" + response.data.data.uuid;
+            store.state.wsUrl + "/wss?user_id=" + response.data.data.user_id;
           console.log(wsUrl);
           store.state.socket = new WebSocket(wsUrl);
           store.state.socket.onopen = () => {

@@ -31,6 +31,7 @@ func WsLogin(c *gin.Context) {
 		})
 		return
 	}
+	zlog.Info("userId获取成功")
 	push.NewClientInit(c, userId)
 }
 
