@@ -135,7 +135,7 @@
             <div class="modal-body">
               <el-form
                 ref="formRef"
-                :model="applyContactReq"
+                :model="applyFriendReq"
                 label-width="100px"
                 class="apply-contact-form"
               >
@@ -407,8 +407,8 @@ export default {
       myGroupList: [],
       myJoinedGroupList: [],
       applyFriendReq: {
-        user_id: "",
-        friend_id: "",
+        user_id: 0,
+        friend_id: 0,
         message: "",
       },
       userListReq: {
@@ -545,7 +545,8 @@ export default {
           store.state.backendUrl + "/contact/applyContact",
           data.applyFriendReq
         );
-        console.log(rsp);
+        console.log(data.applyFriendReq)
+        console.log("rsp为:",rsp);
         if (rsp.data.code == 200) {
           if (rsp.data.message == "申请成功") {
             data.isApplyContactModalVisible = false;
