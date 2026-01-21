@@ -51,8 +51,10 @@ func (p *pusher) Start() {
 	if err != nil {
 		zlog.Error(err.Error())
 	}
+	zlog.Info("监听9090")
 	grpcServer := grpc.NewServer()
 	pb.RegisterPushServer(grpcServer, &pusher{})
+	zlog.Info("注册server")
 	err = grpcServer.Serve(listen)
 	if err != nil {
 		zlog.Error(err.Error())
