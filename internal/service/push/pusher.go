@@ -49,12 +49,15 @@ func (p *pusher) Start() {
 	zlog.Info("Pusher开始启动")
 	listen, err := net.Listen("tcp", ":9090")
 	if err != nil {
+		zlog.Error(err.Error())
 	}
 	grpcServer := grpc.NewServer()
 	pb.RegisterPushServer(grpcServer, &pusher{})
 	err = grpcServer.Serve(listen)
 	if err != nil {
+		zlog.Error(err.Error())
 	}
+	zlog.Info("Pusher开始服务")
 	for {
 		select {
 		case message := <-p.messageChan:
@@ -165,7 +168,7 @@ func NewClientInit(c *gin.Context, userId int64) {
 		Conn:     conn,
 		SendBack: make(chan []byte, constants.CHANNEL_SIZE),
 	}
-
+	zlog.Info("开始登陆client")
 	Pusher.Login <- client
 	zlog.Info("准备启动read&write")
 	go client.Read()
