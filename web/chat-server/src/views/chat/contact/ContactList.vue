@@ -226,13 +226,13 @@ export default {
       contactUserList: [],
       myGroupList: [],
       myJoinedGroupList: [],
-      applyContactReq: {
-        owner_id: "",
-        contact_id: "",
+      applyFriendReq: {
+        user_id: 0,
+        friend_id: 0,
         message: "",
       },
       ownListReq: {
-        owner_id: "",
+        user_id: 0,
       },
       newContactList: [],
       applyContent: "",
@@ -274,15 +274,16 @@ export default {
       data.isApplyContactModalVisible = false;
     };
     const closeApplyContactModal = () => {
-      if (data.applyContactReq.contact_id == "") {
+      if (data.applyFriendReq.friend_id == 0) {
         ElMessage.error("请输入申请用户/群组id");
         return;
       }
-      if (data.applyContactReq.contact_id[0] == 'G') {
-        handleApplyGroup();
-      } else {
-        handleApplyContact();
-      }
+      handleApplyContact();
+      // if (data.applyContactReq.contact_id[0] == 'G') {
+      //   handleApplyGroup();
+      // } else {
+      //   handleApplyContact();
+      // }
     };
 
     const showNewContactModal = () => {
@@ -331,10 +332,10 @@ export default {
     };
     const handleApplyContact = async () => {
       try {
-        data.applyContactReq.owner_id = data.userInfo.user_id;
+        data.applyFriendReq.friend_id = data.userInfo.user_id;
         const rsp = await axios.post(
           store.state.backendUrl + "/contact/applyContact",
-          data.applyContactReq
+          data.applyFriendReq
         );
         console.log(rsp);
         if (rsp.data.code == 200) {
@@ -351,7 +352,7 @@ export default {
     };
     const handleShowUserList = async () => {
       try {
-        data.ownListReq.owner_id = data.userInfo.user_id;
+        data.ownListReq.user_id = data.userInfo.user_id;
         const getUserListRsp = await axios.post(
           store.state.backendUrl + "/contact/getUserList",
           data.ownListReq
