@@ -286,7 +286,7 @@ export default {
       router.push("/chat/" + user.user_id);
     };
     const handleToChat = (conversation) => {
-      router.push("/chat/" + conversation.converation_id);
+      router.push("/chat/" + conversation.conversation_id);
     }
     const handleToChatGroup = (group) => {
       router.push("/chat/" + group.group_id);

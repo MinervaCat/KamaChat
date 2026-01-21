@@ -1152,7 +1152,8 @@ export default {
         // } else {
         //   await getGroupMessageList();
         // }
-        // data.messageList = messageStore.getSessionMsg(router.params.id);
+        data.messageList = messageStore.getSessionMsg(router.currentRoute.value.params.id);
+
         console.log("router", router);
         console.log(data.messageList)
         store.state.socket.onmessage = (jsonMessage) => {
