@@ -23,7 +23,7 @@ var UserServer *userServer
 
 func init() {
 	if UserServer == nil {
-		conn, err := grpc.NewClient("0.0.0.0:9090", grpc.WithInsecure())
+		conn, err := grpc.NewClient("101.43.155.144:9090", grpc.WithInsecure())
 		if err != nil {
 			zlog.Error(err.Error())
 		}
