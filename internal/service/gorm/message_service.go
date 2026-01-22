@@ -22,6 +22,7 @@ type messageService struct {
 var MessageService = new(messageService)
 
 func (m *messageService) GetMessageAfterSeq(userId int64, seq int64) (string, *pb.ResponseForGetMessageBySeq, int) {
+	zlog.Info("GetMessageAfterSeq")
 	var messageList []model.UserMsgList
 	if res := dao.GormDB.Where("user_id = ? AND seq >= ?", userId, seq).Find(&messageList); res.Error != nil {
 		zlog.Error(res.Error.Error())
@@ -46,6 +47,7 @@ func (m *messageService) GetMessageAfterSeq(userId int64, seq int64) (string, *p
 			})
 		}
 	}
+	zlog.Info(fmt.Sprintf("获取聊天数量为%d", len(msgList)))
 	return "获取聊天记录成功", &pb.ResponseForGetMessageBySeq{MessageList: msgList}, 0
 }
 
