@@ -18,14 +18,14 @@ type server struct {
 
 var Server = new(server)
 
-func init() {
+func (s *server) Start() {
 	zlog.Info("Server开始启动")
 	listen, err := net.Listen("tcp", ":9090")
 	if err != nil {
 		zlog.Error(err.Error())
 	}
-
 	grpcServer := grpc.NewServer()
+	defer grpcServer.GracefulStop()
 	pb.RegisterKamaChatServer(grpcServer, &server{})
 
 	err = grpcServer.Serve(listen)

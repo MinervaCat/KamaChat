@@ -1,6 +1,7 @@
 package main
 
 import (
+	"kama_chat_server/grpc_server"
 	"kama_chat_server/internal/service/chat"
 	"kama_chat_server/internal/service/kafka"
 	myredis "kama_chat_server/internal/service/redis"
@@ -13,21 +14,12 @@ import (
 
 func main() {
 	log.Println("chat_server服务开始")
-	//conf := config.GetConfig()
-	//host := conf.MainConfig.Host
-	//port := conf.MainConfig.Port
-	//go func() {
-	//	// Ubuntu22.04云服务器部署
-	//	if err := https_server.GE.RunTLS(fmt.Sprintf("%s:%d", host, port), "/etc/ssl/certs/server.crt", "/etc/ssl/private/server.key"); err != nil {
-	//		zlog.Fatal("server running fault")
-	//		return
-	//	}
-	//}()
+
 	kafka.KafkaService.KafkaInit()
 
 	go chat.ConversationServer.Start()
 	go chat.UserServer.Start()
-
+	go grpc_server.Server.Start()
 	// 设置信号监听
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
