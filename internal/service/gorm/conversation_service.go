@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 	"kama_chat_server/internal/dao"
-	"kama_chat_server/internal/dto/respond"
 	"kama_chat_server/internal/model"
 	myredis "kama_chat_server/internal/service/redis"
+	pb "kama_chat_server/pb"
 	"kama_chat_server/pkg/constants"
 	"kama_chat_server/pkg/enum/contact/contact_status_enum"
 	"kama_chat_server/pkg/enum/user_info/user_status_enum"
@@ -30,7 +31,7 @@ func getConversation(conversationId string) (*model.Conversation, error) {
 }
 
 // GetUserSessionList 获取用户会话列表
-func (s *conversationService) GetConversationList(ownerId int64) (string, []respond.ConversationListRespond, int) {
+func (s *conversationService) GetConversationList(ownerId int64) (string, *pb.ResponseForGetConversationList, int) {
 	rspString, err := myredis.GetKeyNilIsErr(fmt.Sprintf("conversation_list_%d", ownerId))
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
@@ -44,39 +45,40 @@ func (s *conversationService) GetConversationList(ownerId int64) (string, []resp
 					return constants.SYSTEM_ERROR, nil, -1
 				}
 			}
-			var conversationListRsp []respond.ConversationListRespond
+			var conversationListRsp []*pb.ConversationResponse
 			for _, conversation := range conversationList {
 				if con, err := getConversation(conversation.ConversationId); err != nil {
 					zlog.Error(err.Error())
 				} else {
-					conversationListRsp = append(conversationListRsp, respond.ConversationListRespond{
+					conversationListRsp = append(conversationListRsp, &pb.ConversationResponse{
 						ConversationId: conversation.ConversationId,
 						Avatar:         con.Avatar,
-						Type:           con.Type,
+						Type:           int32(con.Type),
 						Member:         con.Member,
-						RecentMsgTime:  con.RecentMsgTime,
+						RecentMsgTime:  timestamppb.New(con.RecentMsgTime),
 						LastReadSeq:    conversation.LastReadSeq,
-						NotifyType:     conversation.NotifyType,
-						IsTop:          conversation.IsTop,
+						NotifyType:     int32(conversation.NotifyType),
+						IsTop:          int32(conversation.IsTop),
 					})
 				}
 			}
+			rsp := &pb.ResponseForGetConversationList{ConversationList: conversationListRsp}
 
-			rspString, err := json.Marshal(conversationListRsp)
+			rspString, err := json.Marshal(rsp)
 			if err != nil {
 				zlog.Error(err.Error())
 			}
 			if err := myredis.SetKeyEx(fmt.Sprintf("conversation_list_%d", ownerId), string(rspString), time.Minute*constants.REDIS_TIMEOUT); err != nil {
 				zlog.Error(err.Error())
 			}
-			return "获取成功", conversationListRsp, 0
+			return "获取成功", rsp, 0
 		} else {
 			zlog.Error(err.Error())
 			return constants.SYSTEM_ERROR, nil, -1
 		}
 	}
-	var rsp []respond.ConversationListRespond
-	if err := json.Unmarshal([]byte(rspString), &rsp); err != nil {
+	rsp := &pb.ResponseForGetConversationList{}
+	if err := json.Unmarshal([]byte(rspString), rsp); err != nil {
 		zlog.Error(err.Error())
 	}
 	return "获取成功", rsp, 0

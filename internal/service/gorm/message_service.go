@@ -3,11 +3,13 @@ package gorm
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"io"
 	"kama_chat_server/internal/config"
 	"kama_chat_server/internal/dao"
 	"kama_chat_server/internal/dto/respond"
 	"kama_chat_server/internal/model"
+	pb "kama_chat_server/pb"
 	"kama_chat_server/pkg/constants"
 	"kama_chat_server/pkg/zlog"
 	"os"
@@ -19,59 +21,59 @@ type messageService struct {
 
 var MessageService = new(messageService)
 
-func (m *messageService) GetMessageAfterSeq(userId int64, seq int64) (string, []respond.MessageRespond, int) {
+func (m *messageService) GetMessageAfterSeq(userId int64, seq int64) (string, *pb.ResponseForGetMessageBySeq, int) {
 	var messageList []model.UserMsgList
 	if res := dao.GormDB.Where("user_id = ? AND seq >= ?", userId, seq).Find(&messageList); res.Error != nil {
 		zlog.Error(res.Error.Error())
 		return constants.SYSTEM_ERROR, nil, -1
 	}
 
-	var rspList []respond.MessageRespond
+	var msgList []*pb.MessageResponse
 	for _, message := range messageList {
 		if msg, err := getMessage(message.MsgId); err != nil {
 			zlog.Error(err.Error())
 			continue
 		} else {
-			rspList = append(rspList, respond.MessageRespond{
+			msgList = append(msgList, &pb.MessageResponse{
 				MsgId:          message.MsgId,
 				ConversationId: message.ConversationId,
 				Seq:            message.Seq,
 				SendId:         msg.UserId,
-				Type:           msg.Type,
+				Type:           int32(msg.Type),
 				Content:        msg.Content,
-				Status:         msg.Status,
-				SendTime:       msg.SendTime,
+				Status:         int32(msg.Status),
+				SendTime:       timestamppb.New(msg.SendTime),
 			})
 		}
 	}
-	return "获取聊天记录成功", rspList, 0
+	return "获取聊天记录成功", &pb.ResponseForGetMessageBySeq{MessageList: msgList}, 0
 }
 
-func (m *messageService) GetMessageBetween(userId, firstSeq, lastSeq int64) (string, []respond.MessageRespond, int) {
+func (m *messageService) GetMessageBetween(userId, firstSeq, lastSeq int64) (string, *pb.ResponseForGetMessageBySeq, int) {
 	var messageList []model.UserMsgList
 	if res := dao.GormDB.Where("user_id = ? AND seq >= ? AND seq <= ?", userId, firstSeq, lastSeq).Find(&messageList); res.Error != nil {
 		zlog.Error(res.Error.Error())
 		return constants.SYSTEM_ERROR, nil, -1
 	}
-	var rspList []respond.MessageRespond
+	var msgList []*pb.MessageResponse
 	for _, message := range messageList {
 		if msg, err := getMessage(message.MsgId); err != nil {
 			zlog.Error(err.Error())
 			continue
 		} else {
-			rspList = append(rspList, respond.MessageRespond{
+			msgList = append(msgList, &pb.MessageResponse{
 				MsgId:          message.MsgId,
 				ConversationId: message.ConversationId,
 				Seq:            message.Seq,
 				SendId:         msg.UserId,
-				Type:           msg.Type,
+				Type:           int32(msg.Type),
 				Content:        msg.Content,
-				Status:         msg.Status,
-				SendTime:       msg.SendTime,
+				Status:         int32(msg.Status),
+				SendTime:       timestamppb.New(msg.SendTime),
 			})
 		}
 	}
-	return "获取聊天记录成功", rspList, 0
+	return "获取聊天记录成功", &pb.ResponseForGetMessageBySeq{MessageList: msgList}, 0
 }
 
 func (m *messageService) GetMessageBySeq(userId, seq int64) (string, respond.MessageRespond, int) {

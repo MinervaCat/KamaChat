@@ -11,6 +11,7 @@ import (
 	"kama_chat_server/internal/dto/respond"
 	"kama_chat_server/internal/model"
 	myredis "kama_chat_server/internal/service/redis"
+	pb "kama_chat_server/pb"
 	"kama_chat_server/pkg/constants"
 	"kama_chat_server/pkg/enum/contact/contact_status_enum"
 	"kama_chat_server/pkg/enum/contact_apply/contact_apply_status_enum"
@@ -28,7 +29,7 @@ var UserContactService = new(userContactService)
 
 // GetUserList 获取用户列表
 // 关于用户被禁用的问题，这里查到的是所有联系人，如果被禁用或被拉黑会以弹窗的形式提醒，无法打开会话框；如果被删除，是搜索不到该联系人的。
-func (u *userContactService) GetFriendList(ownerId int64) (string, []respond.MyUserListRespond, int) {
+func (u *userContactService) GetFriendList(ownerId int64) (string, *pb.RespondForGetFriendList, int) {
 	rspString, err := myredis.GetKeyNilIsErr(fmt.Sprintf("friend_list_%d", ownerId))
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
@@ -47,9 +48,8 @@ func (u *userContactService) GetFriendList(ownerId int64) (string, []respond.MyU
 				}
 			}
 			// dto
-			var userListRsp []respond.MyUserListRespond
+			var userListRsp []*pb.UserResponse
 			for _, contact := range contactList {
-
 				// 获取用户信息
 				var user model.User
 				if res := dao.GormDB.First(&user, "user_id = ?", contact.FriendId); res.Error != nil {
@@ -57,27 +57,37 @@ func (u *userContactService) GetFriendList(ownerId int64) (string, []respond.MyU
 					zlog.Error(res.Error.Error())
 					return constants.SYSTEM_ERROR, nil, -1
 				}
-				userListRsp = append(userListRsp, respond.MyUserListRespond{
-					UserId:   user.UserId,
-					UserName: user.Nickname,
-					Avatar:   user.Avatar,
-				})
-
+				userRsp := &pb.UserResponse{
+					UserId:    user.UserId,
+					Nickname:  user.Nickname,
+					Telephone: user.Telephone,
+					Email:     user.Email,
+					Avatar:    user.Avatar,
+					Gender:    int32(user.Gender),
+					Signature: user.Signature,
+					Birthday:  user.Birthday,
+					IsAdmin:   int32(user.IsAdmin),
+					Status:    int32(user.Status),
+				}
+				year, month, day := user.CreatedAt.Date()
+				userRsp.CreatedAt = fmt.Sprintf("%d.%d.%d", year, month, day)
+				userListRsp = append(userListRsp, userRsp)
 			}
-			rspString, err := json.Marshal(userListRsp)
+			rsp := &pb.RespondForGetFriendList{FriendList: userListRsp}
+			rspString, err := json.Marshal(rsp)
 			if err != nil {
 				zlog.Error(err.Error())
 			}
 			if err := myredis.SetKeyEx(fmt.Sprintf("friend_list_%d", ownerId), string(rspString), time.Minute*constants.REDIS_TIMEOUT); err != nil {
 				zlog.Error(err.Error())
 			}
-			return "获取用户列表成功", userListRsp, 0
+			return "获取用户列表成功", rsp, 0
 		} else {
 			zlog.Error(err.Error())
 		}
 	}
-	var rsp []respond.MyUserListRespond
-	if err := json.Unmarshal([]byte(rspString), &rsp); err != nil {
+	rsp := &pb.RespondForGetFriendList{}
+	if err := json.Unmarshal([]byte(rspString), rsp); err != nil {
 		zlog.Error(err.Error())
 	}
 	return "获取用户列表成功", rsp, 0

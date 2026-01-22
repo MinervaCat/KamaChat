@@ -1,0 +1,121 @@
+syntax = "proto3";
+package pb;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./";
+
+message PushRequest {
+  int64 user_id = 1;
+  bytes message = 2;
+}
+
+message Response {
+  string msg = 1;
+  int32 ret = 2;
+}
+
+service Push {
+  rpc push (PushRequest) returns (Response) {}
+}
+
+service KamaChat {
+  rpc getMessageBySeq (GetMessageBySeqRequest) returns (ResponseForGetMessageBySeq) {}
+  rpc getConversationList (UserIdRequest) returns (ResponseForGetConversationList) {}
+  rpc register (RegisterRequest) returns (UserResponse) {}
+  rpc login (LoginRequest) returns (UserResponse) {}
+  rpc getFriendList (UserIdRequest) returns (RespondForGetFriendList) {}
+  rpc applyFriend (ApplyFriendRequest) returns (Response) {}
+  rpc getApplyList (UserIdRequest) returns (ResponseForApplyList) {}
+  rpc respondToApply (RespondToApply) returns (Response) {}
+}
+
+message GetMessageBySeqRequest {
+  int64 user_id = 1;
+  int64 start_seq = 2;
+  int64 end_seq = 3;
+}
+
+message ResponseForGetMessageBySeq {
+  repeated MessageResponse message_list = 1;
+}
+
+message MessageResponse {
+  int64 msg_id = 1;
+  string conversation_id = 2;
+  int64 seq = 3;
+  int64 send_id = 4;
+  int32 type = 5;
+  string content = 6;
+  int32 status = 7;
+  google.protobuf.Timestamp send_time = 8;
+}
+
+message UserIdRequest {
+  int64 user_id = 1;
+}
+
+message ConversationResponse {
+  string conversation_id = 1;
+  string avatar = 2;
+  int32 type = 3;
+  int32 member = 4;
+  google.protobuf.Timestamp recent_msg_time = 5;
+  int64 last_read_seq = 6;
+  int32 notify_type = 7;
+  int32 is_top = 8;
+}
+
+message ResponseForGetConversationList {
+  repeated ConversationResponse conversation_list = 1;
+}
+
+message RegisterRequest {
+  string telephone = 1;
+  string password = 2;
+  string nickname = 3;
+}
+
+message UserResponse {
+  int64 user_id = 1;
+  string nickname = 2;
+  string telephone = 3;
+  string email = 4;
+  string avatar = 5;
+  int32 gender = 6;
+  string signature = 7;
+  string birthday = 8;
+  string created_at = 9;
+  int32 is_admin = 10;
+  int32 status = 11;
+}
+
+message LoginRequest {
+  string telephone = 1;
+  string password = 2;
+}
+
+message RespondForGetFriendList {
+  repeated UserResponse friend_list = 1;
+}
+
+message ApplyFriendRequest {
+  int64 user_id = 1;
+  int64 friend_id = 2;
+  string message = 3;
+}
+
+message ApplyResponse {
+  int64 friend_id = 1;
+  string nickname = 2;
+  string avatar = 3;
+  string message = 4;
+}
+
+message ResponseForApplyList {
+  repeated ApplyResponse apply_list = 1;
+}
+
+message RespondToApply {
+  int64 user_id = 1;
+  int64 friend_id = 2;
+}

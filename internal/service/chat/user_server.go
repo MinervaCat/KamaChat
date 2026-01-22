@@ -81,6 +81,7 @@ func (u *userServer) Start() {
 			Message: message,
 		})
 		if err != nil {
+			zlog.Error(err.Error())
 		}
 	}
 }
