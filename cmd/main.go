@@ -6,14 +6,13 @@ import (
 	"kama_chat_server/internal/service/kafka"
 	myredis "kama_chat_server/internal/service/redis"
 	"kama_chat_server/pkg/zlog"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
-	log.Println("chat_server服务开始")
+	zlog.Info("chat_server服务开始")
 
 	kafka.KafkaService.KafkaInit()
 
