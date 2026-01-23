@@ -46,7 +46,7 @@ func (k *kafkaService) KafkaInit() {
 	//	AllowAutoTopicCreation: false,
 	//}
 	k.ConversationReader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:        []string{kafkaConfig.HostPort},
+		Brokers:        []string{"101.200.184.252:9092"},
 		Topic:          kafkaConfig.ConversationImTopic,
 		CommitInterval: kafkaConfig.Timeout * time.Second,
 		GroupID:        "chat",
