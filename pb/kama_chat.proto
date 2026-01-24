@@ -63,7 +63,7 @@ message ConversationResponse {
   int64 last_read_seq = 6;
   int32 notify_type = 7;
   int32 is_top = 8;
-  string name = 9;
+  int64 friend_id = 9;
 }
 
 message ResponseForGetConversationList {

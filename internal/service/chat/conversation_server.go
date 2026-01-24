@@ -48,7 +48,7 @@ func (c *conversationServer) Start() {
 		if err != nil {
 			zlog.Error(err.Error())
 		}
-		log.Printf("topic=%s, partition=%d, offset=%d, key=%s, value=%s", kafkaMessage.Topic, kafkaMessage.Partition, kafkaMessage.Offset, kafkaMessage.Key, kafkaMessage.Value)
+		//log.Printf("topic=%s, partition=%d, offset=%d, key=%s, value=%s", kafkaMessage.Topic, kafkaMessage.Partition, kafkaMessage.Offset, kafkaMessage.Key, kafkaMessage.Value)
 		zlog.Info(fmt.Sprintf("topic=%s, partition=%d, offset=%d, key=%s, value=%s", kafkaMessage.Topic, kafkaMessage.Partition, kafkaMessage.Offset, kafkaMessage.Key, kafkaMessage.Value))
 		data := kafkaMessage.Value
 
@@ -56,7 +56,7 @@ func (c *conversationServer) Start() {
 		if err := json.Unmarshal(data, &chatReq); err != nil {
 			zlog.Error(err.Error())
 		}
-		log.Println("原消息为：", data, "反序列化后为：", chatReq)
+		log.Println("原消息为：", string(data), "反序列化后为：", chatReq)
 
 		msgTime := time.Now()
 		var conversationId string

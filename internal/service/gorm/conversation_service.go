@@ -29,21 +29,15 @@ func getConversation(conversationId string) (*model.Conversation, error) {
 	}
 	return &conversation, nil
 }
-func (s *conversationService) getConversationName(conversationId string, userId int64, conType int8) (name string) {
+func (s *conversationService) getConversationFriendId(conversationId string, userId int64, conType int8) int64 {
 	if conType == 1 {
-		name = "group_name"
-		return
+		return 0
 	}
 	var userConversationList model.UserConversationList
 	if res := dao.GormDB.Select("user_id").Where("conversation_id = ? AND user_id != ?", conversationId, userId).First(&userConversationList); res.Error != nil {
 		zlog.Error(res.Error.Error())
 	}
-	var user model.User
-	if res := dao.GormDB.Select("nickname").Where("user_id = ?", userConversationList.UserId).First(&user); res.Error != nil {
-		zlog.Error(res.Error.Error())
-	}
-	name = user.Nickname
-	return
+	return userConversationList.UserId
 }
 
 // GetUserSessionList 获取用户会话列表
@@ -75,7 +69,7 @@ func (s *conversationService) GetConversationList(ownerId int64) (string, *pb.Re
 						LastReadSeq:    conversation.LastReadSeq,
 						NotifyType:     int32(conversation.NotifyType),
 						IsTop:          int32(conversation.IsTop),
-						Name:           s.getConversationName(conversation.ConversationId, ownerId, con.Type),
+						FriendId:       s.getConversationFriendId(conversation.ConversationId, ownerId, con.Type),
 					})
 				}
 			}

@@ -36,7 +36,7 @@ func (u *userContactService) GetFriendList(ownerId int64) (string, *pb.RespondFo
 			// dao
 			var contactList []model.Relation
 			// 没有被删除
-			if res := dao.GormDB.Order("created_at DESC").Where("user_id = ? AND status != 4", ownerId).Find(&contactList); res.Error != nil {
+			if res := dao.GormDB.Where("user_id = ? AND status != 4", ownerId).Find(&contactList); res.Error != nil {
 				// 不存在不是业务问题，用Info，return 0
 				if errors.Is(res.Error, gorm.ErrRecordNotFound) {
 					message := "目前不存在联系人"
