@@ -39,7 +39,7 @@ func (s *conversationService) getConversationName(conversationId string, userId 
 		zlog.Error(res.Error.Error())
 	}
 	var user model.User
-	if res := dao.GormDB.Select("nickname").Where("user_id = ?", userId).First(&user); res.Error != nil {
+	if res := dao.GormDB.Select("nickname").Where("user_id = ?", userConversationList.UserId).First(&user); res.Error != nil {
 		zlog.Error(res.Error.Error())
 	}
 	name = user.Nickname
