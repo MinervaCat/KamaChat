@@ -63,30 +63,30 @@ func (u *userServer) Start() {
 		}
 		zlog.Info("user_server原消息为：" + string(data))
 		//log.Println("user_server原消息为：", data, "反序列化后为：", userMsg)
-		userMsg.Seq = u.userSeq[userMsg.UserId]
-		userMsgList := &model.UserMsgList{
-			UserId:         userMsg.UserId,
-			MsgId:          userMsg.MsgId,
-			ConversationId: userMsg.ConversationId,
-			Seq:            userMsg.Seq,
-		}
-
-		if res := dao.GormDB.Create(&userMsgList); res.Error != nil {
-			zlog.Error(res.Error.Error())
-		}
-
-		message, err := json.Marshal(userMsg)
-		if err != nil {
-			zlog.Error(err.Error())
-		}
-
-		_, err = u.grpcClient.Push(context.Background(), &pb.PushRequest{
-			UserId:  userMsg.UserId,
-			Message: message,
-		})
-		if err != nil {
-			zlog.Error(err.Error())
-		}
+		//userMsg.Seq = u.userSeq[userMsg.UserId]
+		//userMsgList := &model.UserMsgList{
+		//	UserId:         userMsg.UserId,
+		//	MsgId:          userMsg.MsgId,
+		//	ConversationId: userMsg.ConversationId,
+		//	Seq:            userMsg.Seq,
+		//}
+		//
+		//if res := dao.GormDB.Create(&userMsgList); res.Error != nil {
+		//	zlog.Error(res.Error.Error())
+		//}
+		//
+		//message, err := json.Marshal(userMsg)
+		//if err != nil {
+		//	zlog.Error(err.Error())
+		//}
+		//
+		//_, err = u.grpcClient.Push(context.Background(), &pb.PushRequest{
+		//	UserId:  userMsg.UserId,
+		//	Message: message,
+		//})
+		//if err != nil {
+		//	zlog.Error(err.Error())
+		//}
 	}
 }
 
