@@ -17,7 +17,7 @@ func main() {
 	kafka.KafkaService.KafkaInit()
 
 	go chat.ConversationServer.Start()
-	//go chat.UserServer.Start()
+	go chat.UserServer.Start()
 	go grpc_server.Server.Start()
 	// 设置信号监听
 	quit := make(chan os.Signal, 1)
