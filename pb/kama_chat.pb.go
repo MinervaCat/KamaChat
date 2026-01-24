@@ -384,6 +384,7 @@ type ConversationResponse struct {
 	LastReadSeq    int64                  `protobuf:"varint,6,opt,name=last_read_seq,json=lastReadSeq,proto3" json:"last_read_seq,omitempty"`
 	NotifyType     int32                  `protobuf:"varint,7,opt,name=notify_type,json=notifyType,proto3" json:"notify_type,omitempty"`
 	IsTop          int32                  `protobuf:"varint,8,opt,name=is_top,json=isTop,proto3" json:"is_top,omitempty"`
+	Name           string                 `protobuf:"bytes,9,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -472,6 +473,13 @@ func (x *ConversationResponse) GetIsTop() int32 {
 		return x.IsTop
 	}
 	return 0
+}
+
+func (x *ConversationResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
 }
 
 type ResponseForGetConversationList struct {
@@ -1049,7 +1057,7 @@ const file_kama_chat_proto_rawDesc = "" +
 	"\x06status\x18\a \x01(\x05R\x06status\x127\n" +
 	"\tsend_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\bsendTime\"(\n" +
 	"\rUserIdRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"\xa3\x02\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\"\xb7\x02\n" +
 	"\x14ConversationResponse\x12'\n" +
 	"\x0fconversation_id\x18\x01 \x01(\tR\x0econversationId\x12\x16\n" +
 	"\x06avatar\x18\x02 \x01(\tR\x06avatar\x12\x12\n" +
@@ -1059,7 +1067,8 @@ const file_kama_chat_proto_rawDesc = "" +
 	"\rlast_read_seq\x18\x06 \x01(\x03R\vlastReadSeq\x12\x1f\n" +
 	"\vnotify_type\x18\a \x01(\x05R\n" +
 	"notifyType\x12\x15\n" +
-	"\x06is_top\x18\b \x01(\x05R\x05isTop\"g\n" +
+	"\x06is_top\x18\b \x01(\x05R\x05isTop\x12\x12\n" +
+	"\x04name\x18\t \x01(\tR\x04name\"g\n" +
 	"\x1eResponseForGetConversationList\x12E\n" +
 	"\x11conversation_list\x18\x01 \x03(\v2\x18.pb.ConversationResponseR\x10conversationList\"g\n" +
 	"\x0fRegisterRequest\x12\x1c\n" +
