@@ -56,7 +56,7 @@ func (u *userServer) Start() {
 		if err := json.Unmarshal(data, &userMsg); err != nil {
 			zlog.Error(err.Error())
 		}
-		log.Println("原消息为：", data, "反序列化后为：", userMsg)
+		log.Println("user_server原消息为：", data, "反序列化后为：", userMsg)
 		userMsg.Seq = u.userSeq[userMsg.UserId]
 		userMsgList := &model.UserMsgList{
 			UserId:         userMsg.UserId,
