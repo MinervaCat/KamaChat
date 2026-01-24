@@ -14,6 +14,7 @@ import (
 	"kama_chat_server/pkg/zlog"
 	"log"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"time"
 )
@@ -37,6 +38,13 @@ func init() {
 
 func (c *conversationServer) Start() {
 	zlog.Info("ConversationServer开始启动")
+	defer func() {
+		if r := recover(); r != nil {
+			zlog.Error(fmt.Sprintf("conversationServer panic recovered: %v", r))
+			// 打印堆栈跟踪
+			debug.PrintStack()
+		}
+	}()
 	for {
 		kafkaMessage, err := myKafka.KafkaService.ConversationReader.ReadMessage(context.Background())
 		if err != nil {
@@ -135,7 +143,7 @@ func (c *conversationServer) Start() {
 		var userIds []int64
 		if res := dao.GormDB.Model(&model.UserConversationList{}).
 			Where("conversation_id = ?", conversationId).
-			Pluck("user_id", userIds); res.Error != nil {
+			Pluck("user_id", &userIds); res.Error != nil {
 			zlog.Error(res.Error.Error())
 		}
 		for _, userId := range userIds {
