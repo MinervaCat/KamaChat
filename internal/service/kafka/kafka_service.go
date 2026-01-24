@@ -53,7 +53,7 @@ func (k *kafkaService) KafkaInit() {
 		StartOffset:    kafka.LastOffset,
 	})
 	k.UserWriter = &kafka.Writer{
-		Addr:                   kafka.TCP(kafkaConfig.HostPort),
+		Addr:                   kafka.TCP("101.200.184.252:9092"),
 		Topic:                  kafkaConfig.UserImTopic,
 		Balancer:               &kafka.Hash{},
 		WriteTimeout:           kafkaConfig.Timeout * time.Second,
@@ -61,7 +61,7 @@ func (k *kafkaService) KafkaInit() {
 		AllowAutoTopicCreation: false,
 	}
 	k.UserReader = kafka.NewReader(kafka.ReaderConfig{
-		Brokers:        []string{kafkaConfig.HostPort},
+		Brokers:        []string{"101.200.184.252:9092"},
 		Topic:          kafkaConfig.UserImTopic,
 		CommitInterval: kafkaConfig.Timeout * time.Second,
 		GroupID:        "chat",
