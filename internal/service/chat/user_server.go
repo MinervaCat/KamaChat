@@ -44,6 +44,7 @@ type UserMsg struct {
 func (u *userServer) Start() {
 	zlog.Info("UserServer开始启动")
 	defer func() {
+		zlog.Warn("进入defer函数")
 		if r := recover(); r != nil {
 			zlog.Error(fmt.Sprintf("userServer panic recovered: %v", r))
 			// 打印堆栈跟踪
