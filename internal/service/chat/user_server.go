@@ -35,10 +35,9 @@ func init() {
 }
 
 type UserMsg struct {
-	UserId         int64  `json:"user_id"`
-	MsgId          int64  `json:"msg_id"`
-	ConversationId string `json:"conversation_id"`
-	Seq            int64  `json:"seq"`
+	UserId int64      `json:"user_id"`
+	Msg    *model.Msg `json:"msg"`
+	Seq    int64      `json:"seq"`
 }
 
 func (u *userServer) Start() {
@@ -67,8 +66,8 @@ func (u *userServer) Start() {
 		userMsg.Seq = u.userSeq[userMsg.UserId]
 		userMsgList := &model.UserMsgList{
 			UserId:         userMsg.UserId,
-			MsgId:          userMsg.MsgId,
-			ConversationId: userMsg.ConversationId,
+			MsgId:          userMsg.Msg.MsgId,
+			ConversationId: userMsg.Msg.ConversationId,
 			Seq:            userMsg.Seq,
 		}
 		//

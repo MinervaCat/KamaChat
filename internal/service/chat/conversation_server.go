@@ -148,9 +148,8 @@ func (c *conversationServer) Start() {
 		}
 		for _, userId := range userIds {
 			userMsg := UserMsg{
-				UserId:         userId,
-				ConversationId: conversationId,
-				MsgId:          msgId,
+				UserId: userId,
+				Msg:    &msg,
 			}
 			jsonMessage, err := json.Marshal(userMsg)
 			if err != nil {
