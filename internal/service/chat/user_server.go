@@ -10,6 +10,7 @@ import (
 	myKafka "kama_chat_server/internal/service/kafka"
 	pb "kama_chat_server/pb"
 	"kama_chat_server/pkg/zlog"
+	"time"
 )
 
 type userServer struct {
@@ -35,9 +36,15 @@ func init() {
 }
 
 type UserMsg struct {
-	UserId int64      `json:"user_id"`
-	Msg    *model.Msg `json:"msg"`
-	Seq    int64      `json:"seq"`
+	UserId         int64     `json:"user_id"`
+	MsgId          int64     `json:"msg_id"`
+	ConversationId string    `json:"conversation_id"`
+	Seq            int64     `json:"seq"`
+	SendId         int64     `json:"send_id"`
+	Type           int8      `json:"type"`
+	Content        string    `json:"content"`
+	Status         int8      `json:"status"`
+	SendTime       time.Time `json:"send_time"`
 }
 
 func (u *userServer) Start() {
@@ -66,8 +73,8 @@ func (u *userServer) Start() {
 		userMsg.Seq = u.userSeq[userMsg.UserId]
 		userMsgList := &model.UserMsgList{
 			UserId:         userMsg.UserId,
-			MsgId:          userMsg.Msg.MsgId,
-			ConversationId: userMsg.Msg.ConversationId,
+			MsgId:          userMsg.MsgId,
+			ConversationId: userMsg.ConversationId,
 			Seq:            userMsg.Seq,
 		}
 		//

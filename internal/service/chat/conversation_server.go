@@ -146,10 +146,17 @@ func (c *conversationServer) Start() {
 			Pluck("user_id", &userIds); res.Error != nil {
 			zlog.Error(res.Error.Error())
 		}
+
 		for _, userId := range userIds {
 			userMsg := UserMsg{
-				UserId: userId,
-				Msg:    &msg,
+				UserId:         userId,
+				MsgId:          msg.MsgId,
+				ConversationId: msg.ConversationId,
+				SendId:         msg.UserId,
+				Type:           msg.Type,
+				Content:        msg.Content,
+				Status:         msg.Status,
+				SendTime:       msg.SendTime,
 			}
 			jsonMessage, err := json.Marshal(userMsg)
 			if err != nil {
